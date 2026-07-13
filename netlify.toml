@@ -1,7 +1,7 @@
 [build]
   base = "frontend"
   command = "npm run build"
-  publish = "frontend/dist"
+  publish = "dist"
 
 # SPA fallback: any route not matching a static file goes to index.html,
 # so client-side scroll anchors and refreshes on / don't 404.
