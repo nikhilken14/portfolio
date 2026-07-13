@@ -1,0 +1,70 @@
+.app-navbar {
+  background: transparent;
+  padding: 1.25rem 0;
+  transition: background 0.3s ease, padding 0.3s ease, box-shadow 0.3s ease;
+}
+
+.app-navbar--scrolled {
+  background: rgba(11, 29, 38, 0.88);
+  backdrop-filter: blur(10px);
+  padding: 0.75rem 0;
+  box-shadow: 0 4px 24px -8px rgba(0, 0, 0, 0.4);
+}
+
+.app-navbar__brand {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: var(--c-text) !important;
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.app-navbar__brand-bracket {
+  color: var(--c-accent);
+}
+
+.app-navbar__nav {
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.app-navbar__link {
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--c-text-muted) !important;
+  padding: 0.5rem 0.9rem !important;
+  border-radius: 6px;
+  transition: color 0.2s ease, background 0.2s ease;
+  position: relative;
+}
+
+.app-navbar__link:hover {
+  color: var(--c-text) !important;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.app-navbar__link.is-active {
+  color: var(--c-accent) !important;
+}
+
+.app-navbar__progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--c-accent), var(--c-teal));
+  transition: width 0.1s linear;
+}
+
+@media (max-width: 991px) {
+  .app-navbar .navbar-collapse {
+    background: var(--c-bg-alt);
+    border-radius: 10px;
+    margin-top: 1rem;
+    padding: 0.75rem;
+    border: 1px solid var(--c-border);
+  }
+}

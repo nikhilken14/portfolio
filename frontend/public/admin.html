@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Portfolio — Messages Admin</title>
+  <style>
+    :root {
+      --c-bg: #0B1D26;
+      --c-bg-alt: #0F2733;
+      --c-bg-alt-2: #122E3B;
+      --c-text: #E8E4DA;
+      --c-text-muted: #8A9BA8;
+      --c-accent: #F2A65A;
+      --c-teal: #5FA8A0;
+      --c-border: #1D3A47;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--c-bg);
+      color: var(--c-text);
+      font-family: -apple-system, "Inter", sans-serif;
+      padding: 2rem 1.25rem;
+    }
+    .wrap { max-width: 780px; margin: 0 auto; }
+    h1 {
+      font-size: 1.4rem;
+      margin-bottom: 0.25rem;
+    }
+    .sub {
+      color: var(--c-text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 1.75rem;
+    }
+    .config {
+      background: var(--c-bg-alt-2);
+      border: 1px solid var(--c-border);
+      border-radius: 10px;
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: flex-end;
+    }
+    .field { flex: 1 1 220px; }
+    label {
+      display: block;
+      font-size: 0.78rem;
+      color: var(--c-text-muted);
+      margin-bottom: 0.35rem;
+    }
+    input {
+      width: 100%;
+      background: var(--c-bg);
+      border: 1px solid var(--c-border);
+      color: var(--c-text);
+      border-radius: 6px;
+      padding: 0.55rem 0.7rem;
+      font-size: 0.9rem;
+    }
+    input:focus { outline: 2px solid var(--c-teal); }
+    button {
+      background: var(--c-accent);
+      border: none;
+      color: #1A1206;
+      font-weight: 600;
+      padding: 0.6rem 1.25rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      height: 38px;
+    }
+    button:hover { background: #f5b876; }
+    .status {
+      font-size: 0.85rem;
+      margin-bottom: 1.25rem;
+      min-height: 1.2em;
+    }
+    .status.error { color: #e08a8a; }
+    .status.ok { color: #7fd9a0; }
+    .card {
+      background: var(--c-bg-alt-2);
+      border: 1px solid var(--c-border);
+      border-radius: 10px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+    }
+    .card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .name { font-weight: 600; }
+    .date {
+      font-size: 0.75rem;
+      color: var(--c-text-muted);
+      font-family: monospace;
+    }
+    .subject {
+      color: var(--c-accent);
+      font-size: 0.92rem;
+      margin-bottom: 0.5rem;
+    }
+    .message {
+      color: var(--c-text-muted);
+      font-size: 0.92rem;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      margin-bottom: 0.85rem;
+    }
+    .reply-link {
+      color: var(--c-teal);
+      font-size: 0.85rem;
+      text-decoration: none;
+    }
+    .reply-link:hover { text-decoration: underline; }
+    .empty {
+      color: var(--c-text-muted);
+      text-align: center;
+      padding: 3rem 0;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Contact Messages</h1>
+    <p class="sub">Private admin view — not linked from the public site.</p>
+
+    <div class="config">
+      <div class="field">
+        <label for="apiUrl">API URL</label>
+        <input id="apiUrl" placeholder="https://your-api.onrender.com" />
+      </div>
+      <div class="field">
+        <label for="token">Admin Token</label>
+        <input id="token" type="password" placeholder="Your ADMIN_TOKEN" />
+      </div>
+      <button id="loadBtn">Load messages</button>
+    </div>
+
+    <p class="status" id="status"></p>
+    <div id="results"></div>
+  </div>
+
+  <script>
+    const apiUrlInput = document.getElementById("apiUrl");
+    const tokenInput = document.getElementById("token");
+    const statusEl = document.getElementById("status");
+    const resultsEl = document.getElementById("results");
+    const loadBtn = document.getElementById("loadBtn");
+
+    // Convenience only — saved in this browser's localStorage so you don't
+    // retype it every visit. Never checked into git; this file has no
+    // secrets baked in.
+    apiUrlInput.value = localStorage.getItem("admin_api_url") || "";
+    tokenInput.value = localStorage.getItem("admin_token") || "";
+
+    function escapeHtml(str) {
+      const div = document.createElement("div");
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function formatDate(iso) {
+      try {
+        return new Date(iso).toLocaleString();
+      } catch {
+        return iso;
+      }
+    }
+
+    async function loadMessages() {
+      const apiUrl = apiUrlInput.value.trim().replace(/\/$/, "");
+      const token = tokenInput.value.trim();
+
+      if (!apiUrl || !token) {
+        statusEl.textContent = "Enter both the API URL and your admin token.";
+        statusEl.className = "status error";
+        return;
+      }
+
+      localStorage.setItem("admin_api_url", apiUrl);
+      localStorage.setItem("admin_token", token);
+
+      statusEl.textContent = "Loading...";
+      statusEl.className = "status";
+      resultsEl.innerHTML = "";
+
+      try {
+        const res = await fetch(`${apiUrl}/api/admin/messages`, {
+          headers: { "X-Admin-Token": token },
+        });
+
+        if (res.status === 401) {
+          statusEl.textContent = "Invalid admin token.";
+          statusEl.className = "status error";
+          return;
+        }
+        if (res.status === 404) {
+          statusEl.textContent = "Admin endpoint is disabled (ADMIN_TOKEN not set on the server).";
+          statusEl.className = "status error";
+          return;
+        }
+        if (!res.ok) {
+          statusEl.textContent = `Request failed (${res.status}).`;
+          statusEl.className = "status error";
+          return;
+        }
+
+        const messages = await res.json();
+        statusEl.textContent = `Loaded ${messages.length} message${messages.length === 1 ? "" : "s"}.`;
+        statusEl.className = "status ok";
+
+        if (messages.length === 0) {
+          resultsEl.innerHTML = '<p class="empty">No messages yet.</p>';
+          return;
+        }
+
+        resultsEl.innerHTML = messages
+          .map((m) => {
+            const mailtoSubject = encodeURIComponent(`Re: ${m.subject || ""}`);
+            const mailtoHref = `mailto:${encodeURIComponent(m.email)}?subject=${mailtoSubject}`;
+            return `
+              <div class="card">
+                <div class="card-head">
+                  <span class="name">${escapeHtml(m.name || "")} &lt;${escapeHtml(m.email || "")}&gt;</span>
+                  <span class="date">${formatDate(m.received_at)}</span>
+                </div>
+                <div class="subject">${escapeHtml(m.subject || "")}</div>
+                <div class="message">${escapeHtml(m.message || "")}</div>
+                <a class="reply-link" href="${mailtoHref}">Reply via email →</a>
+              </div>
+            `;
+          })
+          .join("");
+      } catch (err) {
+        statusEl.textContent = `Couldn't reach the API: ${err.message}`;
+        statusEl.className = "status error";
+      }
+    }
+
+    loadBtn.addEventListener("click", loadMessages);
+
+    // Auto-load if both fields already have saved values.
+    if (apiUrlInput.value && tokenInput.value) {
+      loadMessages();
+    }
+  </script>
+</body>
+</html>

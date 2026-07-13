@@ -1,0 +1,67 @@
+:root {
+  /* ---- Design tokens ---- */
+  --c-bg: #0B1D26; 
+  --c-bg-alt: #0F2733;
+  --c-bg-alt-2: #122E3B;
+  --c-text: #E8E4DA;
+  --c-text-muted: #8A9BA8;
+  --c-accent: #F2A65A;
+  --c-accent-soft: #F2A65A22;
+  --c-teal: #5FA8A0;
+  --c-teal-soft: #5FA8A022;
+  --c-border: #1D3A47;
+
+  --font-display: "Space Grotesk", "Inter", sans-serif;
+  --font-body: "Inter", -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  --container-max: 1140px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--c-bg);
+  color: var(--c-text);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--c-accent);
+  text-decoration: none;
+}
+
+::selection {
+  background: var(--c-accent);
+  color: var(--c-bg);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: var(--c-bg); }
+::-webkit-scrollbar-thumb { background: var(--c-border); border-radius: 6px; }
+::-webkit-scrollbar-thumb:hover { background: var(--c-teal); }
+
+/* Reduced motion respect */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+:focus-visible {
+  outline: 2px solid var(--c-accent);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
