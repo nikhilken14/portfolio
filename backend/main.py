@@ -26,7 +26,12 @@ app = FastAPI(title="Portfolio API", version="1.0.0")
 # Comma-separated list of allowed origins, e.g.
 # "https://your-site.netlify.app,http://localhost:5173"
 _raw_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173")
-ALLOWED_ORIGINS = [o.strip() for o in _raw_origins.split(",") if o.strip()]
+ALLOWED_ORIGINS = [
+    o.strip().rstrip("/")
+    for o in _raw_origins.split(",")
+    if o.strip()
+]
+print("Allowed Origins:", ALLOWED_ORIGINS)
 
 app.add_middleware(
     CORSMiddleware,
