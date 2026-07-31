@@ -26,12 +26,7 @@ app = FastAPI(title="Portfolio API", version="1.0.0")
 # Comma-separated list of allowed origins, e.g.
 # "https://your-site.netlify.app,http://localhost:5173"
 _raw_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173")
-ALLOWED_ORIGINS = [
-    o.strip().rstrip("/")
-    for o in _raw_origins.split(",")
-    if o.strip()
-]
-print("Allowed Origins:", ALLOWED_ORIGINS)
+ALLOWED_ORIGINS = [o.strip() for o in _raw_origins.split(",") if o.strip()]
 
 app.add_middleware(
     CORSMiddleware,
@@ -88,6 +83,14 @@ class Experience(BaseModel):
     description: List[str]
 
 
+class Certification(BaseModel):
+    id: int
+    name: str
+    issuer: str
+    date: Optional[str] = None
+    credential_url: Optional[str] = None
+
+
 # ---------- Portfolio data ----------
 
 PROFILE = {
@@ -131,15 +134,21 @@ SKILLS: List[Skill] = [
 
     # AI / Machine Learning
     Skill(name="Machine Learning", level=88, category="AI/ML"),
-    Skill(name="Deep Learning", level=75, category="AI/ML"),
-    Skill(name="Retrieval-Augmented Generation (RAG)", level=72, category="AI/ML"),
-    Skill(name="Large Language Models (LLMs)", level=75, category="AI/ML"),
+    Skill(name="Deep Learning", level=78, category="AI/ML"),
+    Skill(name="PyTorch", level=78, category="AI/ML"),
+    Skill(name="Retrieval-Augmented Generation (RAG)", level=82, category="AI/ML"),
+    Skill(name="Large Language Models (LLMs)", level=80, category="AI/ML"),
+    Skill(name="LangChain / LangGraph", level=75, category="AI/ML"),
+    Skill(name="Hugging Face Transformers", level=74, category="AI/ML"),
+    Skill(name="QLoRA / PEFT Fine-Tuning", level=70, category="AI/ML"),
+    Skill(name="Computer Vision (CNNs, Transfer Learning)", level=72, category="AI/ML"),
 
     # Databases
     Skill(name="PostgreSQL", level=85, category="Database"),
     Skill(name="MySQL", level=86, category="Database"),
     Skill(name="MongoDB", level=80, category="Database"),
     Skill(name="Redis", level=65, category="Database"),
+    Skill(name="ChromaDB (Vector DB)", level=72, category="Database"),
 
     # DevOps & Tools
     Skill(name="Git / GitHub", level=92, category="Tools"),
@@ -147,51 +156,89 @@ SKILLS: List[Skill] = [
     Skill(name="Linux", level=80, category="Tools"),
     Skill(name="Postman", level=85, category="Tools"),
     Skill(name="AWS / OCI", level=70, category="Tools"),
+    Skill(name="Power BI", level=68, category="Tools"),
+    Skill(name="Streamlit", level=75, category="Tools"),
 ]
 
 PROJECTS: List[Project] = [
     Project(
         id=1,
-        title="Rate-Limited Student Data Retrieval System",
-        description="Built a Spring Boot RESTful service with token-bucket rate limiting, Caffeine caching, and PostgreSQL optimization to improve performance, reduce database load, and maintain high availability under heavy traffic.",
-        tags=["Spring Boot", "Spring Data JPA", "PostgreSQL", "Caffeine", "REST API"],
-        github="https://github.com/nikhilken14/Rate-Limiter",
+        title="Supply Chain Order Assistant",
+        description="Built a production-style AI assistant for supply-chain operations using a ReAct-style agent that answers questions from ingested PDFs via RAG (with page-level citations) and calls tools against live order/shipment/inventory data — one chat interface handling both unstructured and structured queries.",
+        tags=["FastAPI", "React", "ReAct Agent", "RAG", "ChromaDB", "SQLite", "Qwen2.5"],
+        github="https://github.com/nikhilken14/supply-chain-order-assistant",
         live="",
         featured=True,
     ),
     Project(
         id=2,
-        title="Linux Infrastructure Monitoring & Alerting System",
-        description="Developed a Bash-based Linux monitoring solution that tracks CPU, memory, disk usage, and system uptime with automated email alerts, incident reporting, logging, and Cron-based scheduled health checks.",
-        tags=["Linux", "Bash", "Cron", "Gmail SMTP", "Mailutils", "msmtp"],
-        github="https://github.com/nikhilken14/linux-server-monitoring-alert-system",
+        title="SupplyChainGPT — Fine-Tuning Qwen2.5-1.5B",
+        description="Fine-tuned Qwen2.5-1.5B-Instruct into a domain-specific supply-chain support assistant using QLoRA (4-bit NF4) with Unsloth and TRL's SFTTrainer, trained on a synthetic customer-support dataset for order tracking, refunds, and delivery updates — fully trainable on free GPU resources.",
+        tags=["QLoRA", "PEFT", "Unsloth", "Hugging Face Transformers", "TRL", "PyTorch"],
+        github="https://github.com/nikhilken14/supplychaingpt-qlora-finetuning",
         live="",
         featured=True,
     ),
     Project(
         id=3,
-        title="Car Rental System",
-        description="Built a full-stack car rental platform with a React frontend, Spring Boot REST APIs, and PostgreSQL backend featuring vehicle management, bookings, and real-time availability updates.",
-        tags=["React.js", "Spring Boot", "Spring Data JPA", "PostgreSQL", "REST API"],
-        github="https://github.com/nikhilken14/Car-Rental-Application",
+        title="Math RAG Agent",
+        description="A multimodal (text / PDF / image) math assistant combining OCR and PDF extraction with a formula-retrieval RAG pipeline over ChromaDB, wrapped in a LangChain tool agent with per-session conversation memory and a FastAPI backend plus optional Streamlit demo UI.",
+        tags=["LangChain", "RAG", "ChromaDB", "FastAPI", "OCR", "Streamlit"],
+        github="https://github.com/nikhilken14/math-rag-agent",
         live="",
         featured=True,
     ),
     Project(
         id=4,
-        title="Medical Diagnosis Using AI",
-        description="Developed an AI-powered medical diagnosis application by training and evaluating machine learning models with Scikit-learn and deploying real-time disease prediction through a Streamlit interface.",
-        tags=["Python", "Scikit-learn", "Machine Learning", "Streamlit"],
-        github="https://github.com/nikhilken14/Medical-Diagnosis-Using-AI",
+        title="Groq Multi-Agent Content System",
+        description="A Researcher → Judge → Writer multi-agent pipeline built with LangGraph, where a Researcher gathers grounded findings via web search, a Judge returns a structured approve/revise verdict to drive a bounded revision loop, and a Writer compiles the approved research into a final Markdown article.",
+        tags=["LangGraph", "LangChain", "Groq API", "Multi-Agent Systems", "Streamlit"],
+        github="https://github.com/nikhilken14/groq-multiagent-content-system",
+        live="",
+        featured=True,
+    ),
+    Project(
+        id=5,
+        title="US Fuel Price Forecasting",
+        description="Forecasted US fuel prices from oil-market indicators using both a tuned Random Forest Regressor and a neural network implemented from scratch in NumPy, with autoregressive lag features, recursive 12-month forecasting, stability clipping, and a Power BI dashboard for the underlying dataset.",
+        tags=["Python", "scikit-learn", "NumPy", "Power BI", "Time Series"],
+        github="https://github.com/nikhilken14/fuel-price-forecasting",
         live="",
         featured=False,
     ),
     Project(
-        id=5,
-        title="Finance Chatbot & Financial Data Analysis",
-        description="Created a Python-based financial chatbot that answers predefined queries about Apple, Tesla, and Microsoft using historical financial data analysis, demonstrating chatbot logic, data processing, and conversational interactions.",
-        tags=["Python", "Chatbot", "Financial Analysis", "Data Analysis"],
-        github="https://github.com/nikhilken14/Finance-Chatbot-Data-Analysis",
+        id=6,
+        title="Plant Disease Classification (AlexNet)",
+        description="Trained an AlexNet-based transfer learning model in PyTorch on the PlantVillage dataset to classify plant leaf diseases across multiple categories, covering the full computer vision pipeline from preprocessing and augmentation through evaluation with confusion matrices and classification reports.",
+        tags=["PyTorch", "AlexNet", "Transfer Learning", "Computer Vision", "Torchvision"],
+        github="https://github.com/nikhilken14/plant-disease-classification-alexnet",
+        live="",
+        featured=False,
+    ),
+    Project(
+        id=7,
+        title="Rate-Limited Student Data Retrieval System",
+        description="Built a Spring Boot RESTful service with token-bucket rate limiting, Caffeine caching, and PostgreSQL optimization to improve performance, reduce database load, and maintain high availability under heavy traffic.",
+        tags=["Spring Boot", "Spring Data JPA", "PostgreSQL", "Caffeine", "REST API"],
+        github="https://github.com/nikhilken14/Rate-Limiter",
+        live="",
+        featured=False,
+    ),
+    Project(
+        id=8,
+        title="Linux Infrastructure Monitoring & Alerting System",
+        description="Developed a Bash-based Linux monitoring solution that tracks CPU, memory, disk usage, and system uptime with automated email alerts, incident reporting, logging, and Cron-based scheduled health checks.",
+        tags=["Linux", "Bash", "Cron", "Gmail SMTP", "Mailutils", "msmtp"],
+        github="https://github.com/nikhilken14/linux-server-monitoring-alert-system",
+        live="",
+        featured=False,
+    ),
+    Project(
+        id=9,
+        title="Car Rental System",
+        description="Built a full-stack car rental platform with a React frontend, Spring Boot REST APIs, and PostgreSQL backend featuring vehicle management, bookings, and real-time availability updates.",
+        tags=["React.js", "Spring Boot", "Spring Data JPA", "PostgreSQL", "REST API"],
+        github="https://github.com/nikhilken14/Car-Rental-Application",
         live="",
         featured=False,
     ),
@@ -241,6 +288,44 @@ EXPERIENCE: List[Experience] = [
     ),
 ]
 
+CERTIFICATIONS: List[Certification] = [
+    Certification(
+        id=1,
+        name="OCI Foundation AI Associate",
+        issuer="Oracle",
+        date=None,
+        credential_url=None,
+    ),
+    Certification(
+        id=2,
+        name="OCI Foundation Associate",
+        issuer="Oracle",
+        date=None,
+        credential_url=None,
+    ),
+    Certification(
+        id=3,
+        name="OCI Agentic AI Associate",
+        issuer="Oracle",
+        date=None,
+        credential_url=None,
+    ),
+    Certification(
+        id=4,
+        name="OCI Data Platforms",
+        issuer="Oracle",
+        date=None,
+        credential_url=None,
+    ),
+    Certification(
+        id=5,
+        name="Microsoft Certified: Fabric Analytics Associate",
+        issuer="Microsoft",
+        date=None,
+        credential_url=None,
+    ),
+]
+
 
 # ---------- Routes ----------
 
@@ -272,6 +357,11 @@ def get_education():
 @app.get("/api/experience", response_model=List[Experience])
 def get_experience():
     return EXPERIENCE
+
+
+@app.get("/api/certifications", response_model=List[Certification])
+def get_certifications():
+    return CERTIFICATIONS
 
 
 @app.post("/api/contact")
