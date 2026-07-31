@@ -6,6 +6,7 @@ import Skills from "./components/Skills";
 import Projects from "./components/Projects";
 import Experience from "./components/Experience";
 import Education from "./components/Education";
+import Certifications from "./components/Certifications";
 import Contact from "./components/Contact";
 import Footer from "./components/Footer";
 import Loader from "./components/Loader";
@@ -15,25 +16,22 @@ import {
   getProjects,
   getEducation,
   getExperience,
+  getCertifications,
 } from "./api/client";
 import "./App.css";
 
 // Local fallback so the page still renders something sensible
 // if the FastAPI backend is unreachable (e.g. during first load or offline dev).
 const FALLBACK_PROFILE = {
-  name: "Nikhil Kenjale",
-  role: "Software Engineer",
-  tagline:
-    "Building scalable software, intelligent AI solutions, and modern web applications from backend to frontend.",
-  location: "Pune, India",
-  email: "nikhilkenjale1314@gmail.com",
-  github: "https://github.com/nikhilken14",
-  linkedin: "https://www.linkedin.com/in/nikhilkenjale1314a10/",
-  kaggle: "https://www.kaggle.com/kenjalenikhil14",
-  leetcode: "https://leetcode.com/u/nikhilkenjale/",
-  resumeUrl: "/static/resume.pdf",
+  name: "Alex Carter",
+  role: "Full-Stack Software Engineer",
+  tagline: "I build fast, reliable products end-to-end — from database to pixel.",
+  location: "Bengaluru, India",
+  email: "alex.carter.dev@example.com",
+  github: "https://github.com/alexcarter-dev",
+  linkedin: "https://linkedin.com/in/alexcarter-dev",
   about:
-    "Software Engineer with expertise in Java, Spring Boot, Python, and React. Passionate about building scalable REST APIs, backend systems, and AI-powered applications using clean architecture, modern development practices, and cloud technologies.",
+    "I'm a full-stack engineer who enjoys turning ambiguous problems into clean, maintainable systems.",
 };
 
 export default function App() {
@@ -42,6 +40,7 @@ export default function App() {
   const [projects, setProjects] = useState([]);
   const [education, setEducation] = useState([]);
   const [experience, setExperience] = useState([]);
+  const [certifications, setCertifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [apiError, setApiError] = useState(false);
 
@@ -50,13 +49,14 @@ export default function App() {
 
     async function loadData() {
       try {
-        const [profileData, skillsData, projectsData, educationData, experienceData] =
+        const [profileData, skillsData, projectsData, educationData, experienceData, certificationsData] =
           await Promise.all([
             getProfile(),
             getSkills(),
             getProjects(),
             getEducation(),
             getExperience(),
+            getCertifications(),
           ]);
 
         if (!isMounted) return;
@@ -65,6 +65,7 @@ export default function App() {
         setProjects(projectsData);
         setEducation(educationData);
         setExperience(experienceData);
+        setCertifications(certificationsData);
       } catch (err) {
         console.error("Failed to reach the API, using fallback content:", err);
         if (!isMounted) return;
@@ -74,6 +75,7 @@ export default function App() {
         setProjects([]);
         setEducation([]);
         setExperience([]);
+        setCertifications([]);
       } finally {
         if (isMounted) setLoading(false);
       }
@@ -97,6 +99,7 @@ export default function App() {
         {projects.length > 0 && <Projects projects={projects} />}
         {experience.length > 0 && <Experience experience={experience} />}
         {education.length > 0 && <Education education={education} />}
+        {certifications.length > 0 && <Certifications certifications={certifications} />}
         <Contact profile={profile} />
       </main>
       <Footer profile={profile} />
