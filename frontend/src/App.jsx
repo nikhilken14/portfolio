@@ -23,8 +23,8 @@ import "./App.css";
 // Local fallback so the page still renders something sensible
 // if the FastAPI backend is unreachable (e.g. during first load or offline dev).
 const FALLBACK_PROFILE = {
-  name: "Alex Carter",
-  role: "Full-Stack Software Engineer",
+  name: "Nikhil Kenjale",
+  role: "Software Engineer",
   tagline: "I build fast, reliable products end-to-end — from database to pixel.",
   location: "Bengaluru, India",
   email: "alex.carter.dev@example.com",
