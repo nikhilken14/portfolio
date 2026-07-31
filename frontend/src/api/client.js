@@ -12,6 +12,7 @@ export const getSkills = () => client.get("/api/skills").then((r) => r.data);
 export const getProjects = () => client.get("/api/projects").then((r) => r.data);
 export const getEducation = () => client.get("/api/education").then((r) => r.data);
 export const getExperience = () => client.get("/api/experience").then((r) => r.data);
+export const getCertifications = () => client.get("/api/certifications").then((r) => r.data);
 export const postContact = (payload) => client.post("/api/contact", payload).then((r) => r.data);
 export const getResumeStatus = () => client.get("/api/resume/status").then((r) => r.data);
 
