@@ -25,13 +25,12 @@ import "./App.css";
 const FALLBACK_PROFILE = {
   name: "Nikhil Kenjale",
   role: "Software Engineer",
-  tagline: "I build fast, reliable products end-to-end — from database to pixel.",
-  location: "Bengaluru, India",
-  email: "alex.carter.dev@example.com",
-  github: "https://github.com/alexcarter-dev",
-  linkedin: "https://linkedin.com/in/alexcarter-dev",
-  about:
-    "I'm a full-stack engineer who enjoys turning ambiguous problems into clean, maintainable systems.",
+  tagline: "Building scalable software, intelligent AI solutions, and modern web applications from backend to frontend.",
+  location: "Pune, India",
+  email: "nikhilkenjale1314@gmail.com",
+  github: "https://github.com/nikhilken14",
+  linkedin: "https://www.linkedin.com/in/nikhilkenjale1314a10/",
+  about: "Software Engineer with expertise in Java, Spring Boot, Python, and React.Passionate about building scalable REST APIs, backend systems, and AI-powered applications using clean architecture, modern development practices, and cloud technologies."
 };
 
 export default function App() {

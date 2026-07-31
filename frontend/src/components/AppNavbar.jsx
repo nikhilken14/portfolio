@@ -71,7 +71,7 @@ export default function AppNavbar() {
             }}
           >
             <span className="app-navbar__brand-bracket">{"<"}</span>
-            Alex.Carter
+            Nikhil.Kenjale
             <span className="app-navbar__brand-bracket">{"/>"}</span>
           </Navbar.Brand>
           <Navbar.Toggle aria-controls="main-nav" />
