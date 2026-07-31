@@ -9,6 +9,7 @@ const NAV_LINKS = [
   { id: "projects", label: "Projects" },
   { id: "experience", label: "Experience" },
   { id: "education", label: "Education" },
+  { id: "certifications", label: "Certifications" },
   { id: "contact", label: "Contact" },
 ];
 
@@ -70,7 +71,7 @@ export default function AppNavbar() {
             }}
           >
             <span className="app-navbar__brand-bracket">{"<"}</span>
-            Nikhil.Kenjale
+            Alex.Carter
             <span className="app-navbar__brand-bracket">{"/>"}</span>
           </Navbar.Brand>
           <Navbar.Toggle aria-controls="main-nav" />

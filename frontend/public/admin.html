@@ -148,6 +148,24 @@
     <p class="status" id="status"></p>
     <div id="results"></div>
   </div>
+  <div class="card">
+  <h2>Resume Management</h2>
+
+  <input
+    type="file"
+    id="resumeFile"
+    accept=".pdf"
+    style="margin-bottom:15px;"
+  />
+
+  <div style="display:flex;gap:10px;flex-wrap:wrap;">
+    <button id="uploadResumeBtn">Upload Resume</button>
+    <button id="deleteResumeBtn">Delete Resume</button>
+    <button id="refreshResumeBtn">Refresh Status</button>
+  </div>
+
+  <p id="resumeStatus" style="margin-top:15px;"></p>
+</div>
 
   <script>
     const apiUrlInput = document.getElementById("apiUrl");
@@ -155,6 +173,11 @@
     const statusEl = document.getElementById("status");
     const resultsEl = document.getElementById("results");
     const loadBtn = document.getElementById("loadBtn");
+    const uploadResumeBtn = document.getElementById("uploadResumeBtn");
+const deleteResumeBtn = document.getElementById("deleteResumeBtn");
+const refreshResumeBtn = document.getElementById("refreshResumeBtn");
+const resumeFile = document.getElementById("resumeFile");
+const resumeStatus = document.getElementById("resumeStatus");
 
     // Convenience only — saved in this browser's localStorage so you don't
     // retype it every visit. Never checked into git; this file has no
@@ -249,8 +272,123 @@
     loadBtn.addEventListener("click", loadMessages);
 
     // Auto-load if both fields already have saved values.
+
+
+    async function loadResumeStatus() {
+
+    const apiUrl = apiUrlInput.value.trim().replace(/\/$/, "");
+
+    try {
+
+        const res = await fetch(`${apiUrl}/api/resume/status`);
+
+        if (!res.ok) {
+            resumeStatus.textContent = "Unable to load resume status.";
+            return;
+        }
+
+        const data = await res.json();
+
+        if (!data.available) {
+            resumeStatus.innerHTML = "❌ No resume uploaded";
+        } else {
+
+            resumeStatus.innerHTML =
+                `✅ Resume Uploaded<br>
+                File: <b>${data.filename}</b><br>
+                Uploaded: ${new Date(data.uploaded_at).toLocaleString()}<br><br>
+
+                <a href="${apiUrl}/api/resume" target="_blank">
+                Download Resume
+                </a>`;
+
+        }
+
+    } catch {
+
+        resumeStatus.textContent = "Unable to connect.";
+
+    }
+
+}
+
+uploadResumeBtn.addEventListener("click", async () => {
+
+    const apiUrl = apiUrlInput.value.trim().replace(/\/$/, "");
+    const token = tokenInput.value.trim();
+
+    if (!resumeFile.files.length) {
+
+        alert("Choose a PDF first.");
+        return;
+
+    }
+
+    const formData = new FormData();
+    formData.append("file", resumeFile.files[0]);
+
+    const res = await fetch(`${apiUrl}/api/admin/resume`, {
+
+        method: "POST",
+
+        headers: {
+            "X-Admin-Token": token
+        },
+
+        body: formData
+
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+
+        alert("Resume uploaded successfully.");
+        loadResumeStatus();
+
+    } else {
+
+        alert(data.detail || "Upload failed");
+
+    }
+
+});
+deleteResumeBtn.addEventListener("click", async () => {
+
+    if (!confirm("Delete current resume?"))
+        return;
+
+    const apiUrl = apiUrlInput.value.trim().replace(/\/$/, "");
+    const token = tokenInput.value.trim();
+
+    const res = await fetch(`${apiUrl}/api/admin/resume`, {
+
+        method: "DELETE",
+
+        headers: {
+            "X-Admin-Token": token
+        }
+
+    });
+
+    if (res.ok) {
+
+        alert("Resume deleted.");
+        loadResumeStatus();
+
+    } else {
+
+        alert("Delete failed.");
+
+    }
+
+});
+
+refreshResumeBtn.addEventListener("click", loadResumeStatus);
+
     if (apiUrlInput.value && tokenInput.value) {
       loadMessages();
+      loadResumeStatus();
     }
   </script>
 </body>
