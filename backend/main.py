@@ -299,7 +299,7 @@ CERTIFICATIONS: List[Certification] = [
         name="OCI Certified AI Foundation Associate",
         issuer="Oracle",
         date="October 16, 2025",
-        badge=f"{BASE_URL}/data/OCI25AICFA.jpeg",
+        badge=f"{BASE_URL}data/OCI25AICFA.jpeg",
         url="https://drive.google.com/file/d/19tX84gfZdH1JGMAxrHJOX5OWaC-mV-_m/view?usp=drive_link",
     ),
     Certification(
@@ -307,7 +307,7 @@ CERTIFICATIONS: List[Certification] = [
         name="OCI Certified Foundation Associate",
         issuer="Oracle",
         date="October 17, 2025",
-        badge=f"{BASE_URL}/data/OCI25FNDCFA.jpeg",
+        badge=f"{BASE_URL}data/OCI25FNDCFA.jpeg",
         url="https://drive.google.com/file/d/1lLcs7z0AEXljZTlGC67k6WN3PMQkasIh/view?usp=drive_link",
     ),
     Certification(
@@ -315,7 +315,7 @@ CERTIFICATIONS: List[Certification] = [
         name="Oracle Data Platform Certified Foundations Associate",
         issuer="Oracle",
         date="October 28, 2025",
-        badge=f"{BASE_URL}/data/OCI25DCFAV2.jpg",
+        badge=f"{BASE_URL}data/OCI25DCFAV2.jpg",
         url="https://drive.google.com/file/d/11FjRWkUZM4imWs4LqEeEOx3MJbi1ZZCO/view?usp=drive_link",
     ),
     Certification(
@@ -323,7 +323,7 @@ CERTIFICATIONS: List[Certification] = [
         name="Oracle Agentic AI Certified Foundations Associate",
         issuer="Oracle",
         date="July 11, 2026",
-        badge=f"{BASE_URL}/data/AAI26OFA.jpg",
+        badge=f"{BASE_URL}data/AAI26OFA.jpg",
         url="https://drive.google.com/file/d/1kyMO0Aqy1nt5VRI88WiysAygHZ1eshU8/view?usp=drive_link",
     ),
     Certification(
@@ -331,7 +331,7 @@ CERTIFICATIONS: List[Certification] = [
         name="Microsoft Certified: Fabric Analytics Engineer Associate",
         issuer="Microsoft",
         date="July 30, 2026",
-        badge=f"{BASE_URL}/data/fabric.png",
+        badge=f"{BASE_URL}data/fabric.png",
         url = "https://drive.google.com/file/d/1Q_2a5fYVig2nuO0OUoD_a07eM3VSouJf/view?usp=drive_link",
     ),
 ]
