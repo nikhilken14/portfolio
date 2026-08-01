@@ -88,7 +88,8 @@ class Certification(BaseModel):
     name: str
     issuer: str
     date: Optional[str] = None
-    credential_url: Optional[str] = None
+    badge: str | None = None
+    url: Optional[str] = None
 
 
 # ---------- Portfolio data ----------
@@ -291,38 +292,43 @@ EXPERIENCE: List[Experience] = [
 CERTIFICATIONS: List[Certification] = [
     Certification(
         id=1,
-        name="OCI Foundation AI Associate",
+        name="OCI Certified AI Foundation Associate",
         issuer="Oracle",
-        date=None,
-        credential_url=None,
+        date="October 16, 2025",
+        badge="/data/OCI25AICFA.jpeg",
+        url="https://drive.google.com/file/d/19tX84gfZdH1JGMAxrHJOX5OWaC-mV-_m/view?usp=drive_link",
     ),
     Certification(
         id=2,
-        name="OCI Foundation Associate",
+        name="OCI Certified Foundation Associate",
         issuer="Oracle",
-        date=None,
-        credential_url=None,
+        date="October 17, 2025",
+        badge="/data/OCI25FNDCFA.jpeg",
+        url="https://drive.google.com/file/d/1lLcs7z0AEXljZTlGC67k6WN3PMQkasIh/view?usp=drive_link",
     ),
     Certification(
         id=3,
-        name="OCI Agentic AI Associate",
+        name="Oracle Data Platform Certified Foundations Associate",
         issuer="Oracle",
-        date=None,
-        credential_url=None,
+        date="October 28, 2025",
+        badge="/data/OCI25DCFAV2.jpg",
+        url="https://drive.google.com/file/d/11FjRWkUZM4imWs4LqEeEOx3MJbi1ZZCO/view?usp=drive_link",
     ),
     Certification(
         id=4,
-        name="OCI Data Platforms",
+        name="Oracle Agentic AI Certified Foundations Associate",
         issuer="Oracle",
-        date=None,
-        credential_url=None,
+        date="July 11, 2026",
+        badge="/data/AAI26OFA.jpg",
+        url="https://drive.google.com/file/d/1kyMO0Aqy1nt5VRI88WiysAygHZ1eshU8/view?usp=drive_link",
     ),
     Certification(
         id=5,
-        name="Microsoft Certified: Fabric Analytics Associate",
+        name="Microsoft Certified: Fabric Analytics Engineer Associate",
         issuer="Microsoft",
-        date=None,
-        credential_url=None,
+        date="July 30, 2026",
+        badge="/data/fabric.png",
+        url = "https://drive.google.com/file/d/1Q_2a5fYVig2nuO0OUoD_a07eM3VSouJf/view?usp=drive_link",
     ),
 ]
 
