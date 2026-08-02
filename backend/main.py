@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException, Header, UploadFile, File
 from fastapi.responses import Response
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, EmailStr, Field
@@ -489,3 +490,13 @@ def health_check():
         "mongo_configured": is_mongo_configured(),
         "email_configured": is_email_configured(),
     }
+
+@app.get("/healthcheck")
+def health_monitor():
+    return JSONResponse(
+        status_code=200,
+        content={
+            "status": "UP",
+            "message": "Backend is running"
+        }
+    )
