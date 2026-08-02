@@ -163,7 +163,6 @@ SKILLS: List[Skill] = [
     Skill(name="Postman", level=85, category="Tools"),
     Skill(name="AWS / OCI", level=70, category="Tools"),
     Skill(name="Power BI", level=68, category="Tools"),
-    Skill(name="Streamlit", level=75, category="Tools"),
 ]
 
 PROJECTS: List[Project] = [
