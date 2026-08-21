@@ -2,18 +2,32 @@
   position: relative;
 }
 
+.education-card__icon-wrap {
+  width: 46px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(var(--c-accent-rgb), 0.18), rgba(var(--c-accent-2-rgb), 0.14));
+  border: 1px solid var(--c-border);
+  margin-bottom: 1.1rem;
+}
+
 .education-card__icon {
-  font-size: 1.6rem;
-  color: var(--c-accent);
-  margin-bottom: 1rem;
-  display: block;
+  font-size: 1.35rem;
+  background: linear-gradient(135deg, var(--c-accent-2), var(--c-accent));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .education-card__duration {
   font-family: var(--font-mono);
   font-size: 0.78rem;
-  color: var(--c-teal);
+  color: var(--c-accent-2);
   margin-bottom: 0.6rem;
+  display: inline-block;
 }
 
 .education-card__degree {

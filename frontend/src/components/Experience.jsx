@@ -7,10 +7,12 @@ export default function Experience({ experience }) {
     <section id="experience" className="section section-alt">
       <Container className="container-narrow">
         <Reveal>
-          <p className="eyebrow">// experience</p>
+          <p className="eyebrow">experience.timeline</p>
         </Reveal>
         <Reveal delay={1}>
-          <h2 className="section-title">Where I've worked</h2>
+          <h2 className="section-title">
+            Where I've <span className="section-title__accent">worked</span>
+          </h2>
         </Reveal>
         <Reveal delay={2}>
           <p className="section-sub">

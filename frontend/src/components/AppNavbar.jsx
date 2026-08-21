@@ -16,7 +16,6 @@ const NAV_LINKS = [
 export default function AppNavbar() {
   const [activeSection, setActiveSection] = useState("home");
   const [scrollProgress, setScrollProgress] = useState(0);
-  const [scrolled, setScrolled] = useState(false);
   const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
@@ -25,7 +24,6 @@ export default function AppNavbar() {
       const scrollTop = doc.scrollTop || document.body.scrollTop;
       const scrollHeight = (doc.scrollHeight || document.body.scrollHeight) - doc.clientHeight;
       setScrollProgress(scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0);
-      setScrolled(scrollTop > 24);
 
       // Determine active section by finding the one closest to top
       let current = "home";
@@ -56,10 +54,9 @@ export default function AppNavbar() {
     <>
       <Navbar
         expand="lg"
-        fixed="top"
         expanded={expanded}
         onToggle={setExpanded}
-        className={`app-navbar ${scrolled ? "app-navbar--scrolled" : ""}`}
+        className="app-navbar"
       >
         <Container className="container-narrow">
           <Navbar.Brand

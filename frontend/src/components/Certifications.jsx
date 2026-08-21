@@ -7,11 +7,13 @@ export default function Certifications({ certifications }) {
     <section id="certifications" className="section">
       <Container className="container-narrow">
         <Reveal>
-          <p className="eyebrow">// certifications</p>
+          <p className="eyebrow">certifications.verify()</p>
         </Reveal>
 
         <Reveal delay={1}>
-          <h2 className="section-title">Certifications</h2>
+          <h2 className="section-title">
+            <span className="section-title__accent">Certifications</span>
+          </h2>
         </Reveal>
 
         <Reveal delay={2}>
@@ -32,11 +34,13 @@ export default function Certifications({ certifications }) {
                 >
                   <div className="panel-card h-100">
 
-                    <img
-                      src={cert.badge}
-                      alt={cert.name}
-                      className="cert-card__badge"
-                    />
+                    <div className="cert-card__badge-frame">
+                      <img
+                        src={cert.badge}
+                        alt={cert.name}
+                        className="cert-card__badge"
+                      />
+                    </div>
 
                     <h3 className="cert-card__name">
                       {cert.name}

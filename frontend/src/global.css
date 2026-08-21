@@ -1,21 +1,40 @@
 :root {
-  /* ---- Design tokens ---- */
-  --c-bg: #0B1D26; 
-  --c-bg-alt: #0F2733;
-  --c-bg-alt-2: #122E3B;
-  --c-text: #E8E4DA;
-  --c-text-muted: #8A9BA8;
-  --c-accent: #F2A65A;
-  --c-accent-soft: #F2A65A22;
-  --c-teal: #5FA8A0;
-  --c-teal-soft: #5FA8A022;
-  --c-border: #1D3A47;
+  /* ---- Design tokens : terminal theme ---- */
+  --c-bg: #000000;
+  --c-bg-alt: #060a08;
+  --c-bg-alt-2: #0a0f0d;
+  --c-glass: rgba(6, 12, 10, 0.6);
+  --c-glass-strong: rgba(4, 8, 7, 0.9);
 
-  --font-display: "Space Grotesk", "Inter", sans-serif;
-  --font-body: "Inter", -apple-system, sans-serif;
+  --c-text: #d9ffe4;
+  --c-text-muted: #5f8f74;
+  --c-text-dim: #35513f;
+
+  /* Only two signal hues in this theme: terminal green (primary) and
+     electric blue (secondary/system). No other colors are introduced. */
+  --c-accent: #3ba7ff;
+  --c-accent-rgb: 59, 167, 255;
+  --c-accent-soft: rgba(59, 167, 255, 0.12);
+  --c-accent-2: #39ff6a;
+  --c-accent-2-rgb: 57, 255, 106;
+  --c-accent-2-soft: rgba(57, 255, 106, 0.12);
+  --c-warn: var(--c-accent);
+
+  --c-teal: var(--c-accent-2);
+  --c-teal-soft: var(--c-accent-2-soft);
+
+  --c-border: rgba(57, 255, 106, 0.16);
+  --c-border-strong: rgba(57, 255, 106, 0.32);
+
+  --font-display: "JetBrains Mono", monospace;
+  --font-body: "JetBrains Mono", monospace;
   --font-mono: "JetBrains Mono", monospace;
 
-  --container-max: 1140px;
+  --container-max: 1180px;
+
+  --glow-accent: 0 0 22px -4px rgba(var(--c-accent-rgb), 0.6);
+  --glow-accent-2: 0 0 22px -4px rgba(var(--c-accent-2-rgb), 0.6);
+  --ease-signal: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 * {
@@ -32,25 +51,55 @@ body {
   color: var(--c-text);
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
+  position: relative;
+  min-height: 100vh;
+}
+
+/* Faint green circuit grid + CRT scanlines behind the whole document */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background-image: linear-gradient(var(--c-border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--c-border) 1px, transparent 1px);
+  background-size: 56px 56px;
+  opacity: 0.3;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 10%, transparent 75%);
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(57, 255, 106, 0.025) 0px,
+    rgba(57, 255, 106, 0.025) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  mix-blend-mode: overlay;
 }
 
 a {
-  color: var(--c-accent);
+  color: var(--c-accent-2);
   text-decoration: none;
 }
 
 ::selection {
-  background: var(--c-accent);
-  color: var(--c-bg);
+  background: var(--c-accent-2);
+  color: #000;
 }
 
-/* Scrollbar */
 ::-webkit-scrollbar { width: 10px; }
 ::-webkit-scrollbar-track { background: var(--c-bg); }
-::-webkit-scrollbar-thumb { background: var(--c-border); border-radius: 6px; }
-::-webkit-scrollbar-thumb:hover { background: var(--c-teal); }
+::-webkit-scrollbar-thumb { background: var(--c-border-strong); border-radius: 6px; }
+::-webkit-scrollbar-thumb:hover { background: var(--c-accent-2); }
 
-/* Reduced motion respect */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -61,7 +110,7 @@ a {
 }
 
 :focus-visible {
-  outline: 2px solid var(--c-accent);
+  outline: 2px solid var(--c-accent-2);
   outline-offset: 3px;
-  border-radius: 3px;
+  border-radius: 2px;
 }

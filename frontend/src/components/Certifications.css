@@ -2,7 +2,7 @@
   display: block;
   position: relative;
   color: inherit;
-  transition: transform .25s ease;
+  transition: transform 0.3s var(--ease-signal);
 }
 
 .cert-card:hover {
@@ -17,11 +17,34 @@
   text-align: center;
 }
 
-.cert-card__badge {
+.cert-card__badge-frame {
   width: 130px;
   height: 130px;
-  object-fit: contain;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin-bottom: 1.4rem;
+  position: relative;
+  background: conic-gradient(from 0deg, rgba(var(--c-accent-rgb), 0.35), rgba(var(--c-accent-2-rgb), 0.35), rgba(var(--c-accent-rgb), 0.35));
+  padding: 3px;
+}
+
+.cert-card__badge-frame::before {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  background: var(--c-bg-alt-2);
+}
+
+.cert-card__badge {
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
+  position: relative;
+  z-index: 1;
+  transition: transform 0.3s ease;
 }
 
 .cert-card__name {
@@ -30,19 +53,19 @@
   line-height: 1.4;
   font-weight: 600;
   color: var(--c-text);
-  margin-bottom: .6rem;
+  margin-bottom: 0.6rem;
 }
 
 .cert-card__issuer {
   color: var(--c-text-muted);
-  font-size: .95rem;
-  margin-bottom: .35rem;
+  font-size: 0.95rem;
+  margin-bottom: 0.35rem;
 }
 
 .cert-card__date {
   font-family: var(--font-mono);
-  color: var(--c-accent);
-  font-size: .82rem;
+  color: var(--c-accent-2);
+  font-size: 0.82rem;
   margin-bottom: 1rem;
 }
 
@@ -50,9 +73,9 @@
   margin-top: auto;
   display: inline-flex;
   align-items: center;
-  gap: .45rem;
-  color: var(--c-teal);
-  font-size: .9rem;
+  gap: 0.45rem;
+  color: var(--c-accent-2);
+  font-size: 0.9rem;
   font-weight: 500;
 }
 
@@ -61,9 +84,5 @@
 }
 
 .cert-card:hover .cert-card__badge {
-  transform: scale(1.05);
-}
-
-.cert-card__badge {
-  transition: transform .3s ease;
+  transform: scale(1.06);
 }

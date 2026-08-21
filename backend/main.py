@@ -142,12 +142,14 @@ SKILLS: List[Skill] = [
     Skill(name="Machine Learning", level=88, category="AI/ML"),
     Skill(name="Deep Learning", level=78, category="AI/ML"),
     Skill(name="PyTorch", level=78, category="AI/ML"),
-    Skill(name="Retrieval-Augmented Generation (RAG)", level=82, category="AI/ML"),
-    Skill(name="Large Language Models (LLMs)", level=80, category="AI/ML"),
-    Skill(name="LangChain / LangGraph", level=75, category="AI/ML"),
-    Skill(name="Hugging Face Transformers", level=74, category="AI/ML"),
-    Skill(name="QLoRA / PEFT Fine-Tuning", level=70, category="AI/ML"),
     Skill(name="Computer Vision (CNNs, Transfer Learning)", level=72, category="AI/ML"),
+
+    # GenAI
+    Skill(name="Retrieval-Augmented Generation (RAG)", level=82, category="GenAI"),
+    Skill(name="Large Language Models (LLMs)", level=80, category="GenAI"),
+    Skill(name="LangChain / LangGraph", level=75, category="GenAI"),        
+    Skill(name="Hugging Face Transformers", level=74, category="GenAI"),
+    Skill(name="QLoRA / PEFT Fine-Tuning", level=70, category="GenAI"),
 
     # Databases
     Skill(name="PostgreSQL", level=85, category="Database"),
