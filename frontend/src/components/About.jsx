@@ -3,17 +3,16 @@ import { Container, Row, Col } from "react-bootstrap";
 import Reveal from "./Reveal";
 import useReveal from "../hooks/useReveal";
 import "./About.css";
+import Particle from "./Particle";
 
 const STATS = [
-  { value: "5+", label: "production-style projects" },
-  { value: "15+", label: "technologies worked with" },
-  { value: "400+", label: "coding problems solved" },
-  { value: "3", label: "domains explored (Backend, AI & DevOps)" },
+  { value: "5+", label: "production style projects", icon: "bi-boxes" },
+  { value: "15+", label: "technologies worked with", icon: "bi-layers" },
+  { value: "400+", label: "coding problems solved", icon: "bi-braces" },
+  { value: "3", label: "domains( backend, AI & DevOps )", icon: "bi-diagram-3" },
 ];
 
-const GLYPHS = ["{ }", "</>", ";", "( )", "#!", "=>"];
-
-function StatCard({ stat, delay }) {
+function StatCard({ stat, index }) {
   const { ref, isVisible } = useReveal();
   const numeric = parseInt(stat.value.replace(/\D/g, ""), 10) || 0;
   const suffix = stat.value.replace(/[0-9]/g, "");
@@ -22,8 +21,9 @@ function StatCard({ stat, delay }) {
   useEffect(() => {
     if (!isVisible) return;
     let start;
-    const duration = 1300;
+    const duration = 1400;
     let frame;
+
     function tick(ts) {
       if (start === undefined) start = ts;
       const progress = Math.min((ts - start) / duration, 1);
@@ -31,43 +31,25 @@ function StatCard({ stat, delay }) {
       setCount(Math.round(eased * numeric));
       if (progress < 1) frame = requestAnimationFrame(tick);
     }
+
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
   }, [isVisible, numeric]);
 
   return (
-    <div ref={ref} className={`about__stat panel-card reveal ${delay ? `reveal-delay-${delay}` : ""} ${isVisible ? "is-visible" : ""}`}>
+    <div
+      ref={ref}
+      className={`about__stat ${isVisible ? "is-visible" : ""}`}
+      style={{ transitionDelay: `${index * 70}ms` }}
+    >
+      <i className={`bi ${stat.icon} about__stat-icon`} aria-hidden="true" />
       <div className="about__stat-value">
         {count}
-        {suffix}
+        <span className="about__stat-suffix">{suffix}</span>
       </div>
       <div className="about__stat-label">{stat.label}</div>
     </div>
   );
-}
-
-// Types the given text out character-by-character once it scrolls into view.
-function useTypeOnReveal(text, speed = 16) {
-  const { ref, isVisible } = useReveal();
-  const [typed, setTyped] = useState("");
-
-  useEffect(() => {
-    if (!isVisible) return;
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduceMotion) {
-      setTyped(text);
-      return;
-    }
-    let i = 0;
-    const interval = setInterval(() => {
-      i += 1;
-      setTyped(text.slice(0, i));
-      if (i >= text.length) clearInterval(interval);
-    }, speed);
-    return () => clearInterval(interval);
-  }, [isVisible, text, speed]);
-
-  return { ref, typed, isVisible };
 }
 
 export default function About({ profile }) {
@@ -75,72 +57,58 @@ export default function About({ profile }) {
     profile?.about ||
     "I'm a full-stack engineer who enjoys turning ambiguous problems into clean, maintainable systems.";
   const location = profile?.location;
-  const { ref: typeRef, typed, isVisible: typedVisible } = useTypeOnReveal(about, 14);
+  const role = profile?.role;
 
   return (
-    <section id="about" className="section about">
-      <span className="about__glyph about__glyph--1" aria-hidden="true">{GLYPHS[0]}</span>
-      <span className="about__glyph about__glyph--2" aria-hidden="true">{GLYPHS[1]}</span>
-      <span className="about__glyph about__glyph--3" aria-hidden="true">{GLYPHS[4]}</span>
-      <span className="about__glyph about__glyph--4" aria-hidden="true">{GLYPHS[5]}</span>
-
+    <section id="about" className="about">
+      <Particle />
       <Container className="container-narrow">
-        <Reveal>
-          <p className="eyebrow">about.exe</p>
-        </Reveal>
-        <Row className="gy-5 align-items-start">
-          <Col lg={7}>
+        <div className="about__grid">
+          <div className="about__intro">
+
             <Reveal delay={1}>
-              <h2 className="section-title">
-                A little <span className="section-title__accent">about me</span>
+              <h2 className="about-title">
+                A little <span className="about__accent">about me</span>
               </h2>
             </Reveal>
 
-            <div className="term-window about__term" ref={typeRef}>
-              <div className="term-window__bar">
-                <span className="term-window__dot term-window__dot--accent2" />
-                <span className="term-window__dot term-window__dot--accent" />
-                <span className="term-window__dot" />
-                <span className="term-window__title">cat about.txt</span>
-              </div>
-              <div className="term-window__body about__term-body">
-                <span className="about__term-prompt">$ cat about.txt</span>
-                <p className="about__body">
-                  {typed}
-                  {typedVisible && typed.length < about.length && (
-                    <span className="about__type-cursor" aria-hidden="true" />
-                  )}
-                </p>
-              </div>
-            </div>
+            <Reveal delay={2}>
+              <p className="about__body">{about}</p>
+            </Reveal>
 
             <Reveal delay={3}>
               <div className="about__meta">
-                <div className="about__meta-item">
-                  <i className="bi bi-geo-alt about__meta-icon" />
-                  {location}
-                </div>
-                <div className="about__meta-item">
-                  <i className="bi bi-briefcase about__meta-icon" />
-                  Open to new opportunities
-                </div>
+                {role && (
+                  <div className="about__meta-item">
+                    <i className="bi bi-briefcase about__meta-icon" />
+                    <span>{role}</span>
+                  </div>
+                )}
+                {location && (
+                  <div className="about__meta-item">
+                    <i className="bi bi-geo-alt about__meta-icon" />
+                    <span>{location}</span>
+                  </div>
+                )}
                 <div className="about__meta-item about__meta-item--live">
+                  <span className="about__meta-pulse" />
                   <span className="about__meta-dot" />
-                  status: online
+                  <span>Available now</span>
                 </div>
               </div>
             </Reveal>
-          </Col>
-          <Col lg={5}>
-            <Row className="gy-4">
+          </div>
+
+          <div className="about__stats">
+            <Row className="g-3">
               {STATS.map((stat, i) => (
                 <Col xs={6} key={stat.label}>
-                  <StatCard stat={stat} delay={(i % 4) + 1} />
+                  <StatCard stat={stat} index={i} />
                 </Col>
               ))}
             </Row>
-          </Col>
-        </Row>
+          </div>
+        </div>
       </Container>
     </section>
   );

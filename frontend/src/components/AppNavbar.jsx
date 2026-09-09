@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Navbar, Nav, Container } from "react-bootstrap";
 import "./AppNavbar.css";
 
@@ -10,20 +10,38 @@ const NAV_LINKS = [
   { id: "experience", label: "Experience" },
   { id: "education", label: "Education" },
   { id: "certifications", label: "Certifications" },
-  { id: "contact", label: "Contact" },
 ];
 
 export default function AppNavbar() {
   const [activeSection, setActiveSection] = useState("home");
   const [scrollProgress, setScrollProgress] = useState(0);
   const [expanded, setExpanded] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [visible, setVisible] = useState(true);
+
+  // Keep track of previous scroll position without causing unnecessary re-renders
+  const lastScrollY = useRef(0);
 
   useEffect(() => {
     const handleScroll = () => {
       const doc = document.documentElement;
-      const scrollTop = doc.scrollTop || document.body.scrollTop;
+      const scrollTop = window.scrollY || doc.scrollTop || document.body.scrollTop;
       const scrollHeight = (doc.scrollHeight || document.body.scrollHeight) - doc.clientHeight;
+      
       setScrollProgress(scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0);
+      setScrolled(scrollTop > 24);
+
+      // --- Scroll Direction Detection ---
+      // Show navbar if at the top OR scrolling UP; hide if scrolling DOWN past 80px threshold
+      if (scrollTop <= 80) {
+        setVisible(true);
+      } else if (scrollTop > lastScrollY.current) {
+        setVisible(false); // Scrolling Down
+      } else {
+        setVisible(true);  // Scrolling Up
+      }
+      
+      lastScrollY.current = scrollTop;
 
       // Determine active section by finding the one closest to top
       let current = "home";
@@ -56,7 +74,7 @@ export default function AppNavbar() {
         expand="lg"
         expanded={expanded}
         onToggle={setExpanded}
-        className="app-navbar"
+        className={`app-navbar ${scrolled ? "is-scrolled" : ""} ${!visible ? "is-hidden" : ""}`}
       >
         <Container className="container-narrow">
           <Navbar.Brand
@@ -67,9 +85,7 @@ export default function AppNavbar() {
               handleNavClick("home");
             }}
           >
-            <span className="app-navbar__brand-bracket">{"<"}</span>
             Nikhil.Kenjale
-            <span className="app-navbar__brand-bracket">{"/>"}</span>
           </Navbar.Brand>
           <Navbar.Toggle aria-controls="main-nav" />
           <Navbar.Collapse id="main-nav">
@@ -88,6 +104,16 @@ export default function AppNavbar() {
                 </Nav.Link>
               ))}
             </Nav>
+            <a
+              href="#contact"
+              className="app-navbar__cta"
+              onClick={(e) => {
+                e.preventDefault();
+                handleNavClick("contact");
+              }}
+            >
+              Let&apos;s talk
+            </a>
           </Navbar.Collapse>
         </Container>
         <div className="app-navbar__progress" style={{ width: `${scrollProgress}%` }} />

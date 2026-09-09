@@ -1,0 +1,10 @@
+.particle-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1; /* Keeps it behind all page content */
+  pointer-events: none; /* Allows clicks to pass through to elements underneath */
+  background: transparent;
+}

@@ -4,341 +4,444 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="robots" content="noindex, nofollow" />
-  <title>Portfolio Admin</title>
+  <title>Portfolio Admin Dashboard</title>
   <style>
     :root {
-      --c-bg: #0B1D26;
-      --c-bg-alt: #0F2733;
-      --c-bg-alt-2: #122E3B;
-      --c-text: #E8E4DA;
-      --c-text-muted: #8A9BA8;
-      --c-accent: #F2A65A;
-      --c-teal: #5FA8A0;
-      --c-border: #1D3A47;
-      --c-danger: #e08a8a;
-      --c-success: #7fd9a0;
+      --bg-main: #0b0f17;
+      --bg-card: #121824;
+      --bg-card-hover: #171f2e;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-focus: #3b82f6;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --accent-blue: #1d4ed8;
+      --accent-blue-gradient: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+      --success: #10b981;
+      --danger: #ef4444;
     }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      background: var(--c-bg);
-      color: var(--c-text);
-      font-family: -apple-system, "Inter", sans-serif;
-      padding: 2rem 1.25rem 4rem;
-    }
-    .wrap { max-width: 920px; margin: 0 auto; }
 
-    /* ---------- Header ---------- */
-    .page-header {
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      padding: 2.5rem 2rem;
+      min-height: 100vh;
+    }
+
+    .dashboard-container {
+      max-width: 1300px;
+      margin: 0 auto;
+    }
+
+    /* Top Header & Navigation Tabs */
+    .dashboard-header {
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 1rem;
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
       flex-wrap: wrap;
-      gap: 0.75rem;
-      margin-bottom: 1.75rem;
+      gap: 1rem;
     }
-    .page-header h1 {
+
+    .dashboard-title h1 {
       font-size: 1.5rem;
-      margin: 0 0 0.25rem 0;
+      font-weight: 600;
+      letter-spacing: -0.3px;
+      color: #ffffff;
+      margin-bottom: 0.25rem;
     }
-    .page-header .sub {
-      color: var(--c-text-muted);
-      font-size: 0.88rem;
-      margin: 0;
+
+    .dashboard-title p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
     }
-    .conn-indicator {
+
+    .nav-tabs {
+      display: flex;
+      gap: 1.5rem;
+      list-style: none;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 2rem;
+    }
+
+    .nav-tabs li {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      padding-bottom: 0.75rem;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: color 0.2s, border-color 0.2s;
+    }
+
+    .nav-tabs li.active {
+      color: #ffffff;
+      border-bottom-color: #f97316; /* Grafana orange style active tab */
+    }
+
+    .nav-tabs li:hover {
+      color: #ffffff;
+    }
+
+    /* Connection & Config Bar */
+    .config-bar {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 1.25rem;
+      margin-bottom: 2rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: flex-end;
+    }
+
+    .field {
+      flex: 1 1 260px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+      font-weight: 600;
+    }
+
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      background: #090d14;
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      border-radius: 4px;
+      padding: 0.55rem 0.75rem;
+      font-size: 0.9rem;
+      transition: border-color 0.2s;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--border-focus);
+    }
+
+    .btn {
+      background: #2563eb;
+      border: none;
+      color: #ffffff;
+      font-weight: 600;
+      padding: 0.55rem 1.25rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      height: 36px;
+      transition: background 0.15s;
+    }
+
+    .btn:hover { background: #1d4ed8; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+    }
+    .btn-secondary:hover { background: rgba(255, 255, 255, 0.05); border-color: var(--text-muted); }
+
+    .btn-danger {
+      background: transparent;
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: var(--danger);
+    }
+    .btn-danger:hover { background: rgba(239, 68, 68, 0.1); }
+
+    /* Metric Cards Grid */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .metric-card {
+      background: var(--accent-blue-gradient);
+      border-radius: 6px;
+      padding: 1.5rem;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .metric-card.neutral {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+    }
+
+    .metric-title {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: rgba(255, 255, 255, 0.8);
+      margin-bottom: 0.5rem;
+    }
+
+    .metric-card.neutral .metric-title {
+      color: var(--text-muted);
+    }
+
+    .metric-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: -0.5px;
+    }
+
+    .metric-subtext {
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.7);
+      margin-top: 0.5rem;
+    }
+
+    /* Section Panels & Tables */
+    .panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+    }
+
+    .panel-header h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    .status-msg {
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+      min-height: 1.2em;
+    }
+    .status-msg.error { color: var(--danger); }
+    .status-msg.ok { color: var(--success); }
+
+    /* Data Table styling matching Grafana look */
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.85rem;
+    }
+
+    th {
+      background: #090d14;
+      color: var(--text-muted);
+      font-weight: 600;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border-color);
+      text-transform: uppercase;
+      font-size: 0.7rem;
+      letter-spacing: 0.5px;
+    }
+
+    td {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-main);
+    }
+
+    tr:hover td {
+      background: var(--bg-card-hover);
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 0.65rem;
+      font-family: monospace;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+    .badge.uploaded { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
+    .badge.missing { background: rgba(156, 163, 175, 0.15); color: var(--text-muted); border: 1px solid var(--border-color); }
+
+    .conn-pill {
       display: inline-flex;
       align-items: center;
       gap: 0.4rem;
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       font-family: monospace;
-      color: var(--c-text-muted);
-      padding: 0.35rem 0.7rem;
-      border: 1px solid var(--c-border);
-      border-radius: 20px;
-      background: var(--c-bg-alt-2);
+      padding: 0.25rem 0.6rem;
+      border-radius: 12px;
+      background: #090d14;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
     }
     .conn-dot {
-      width: 8px;
-      height: 8px;
+      width: 6px;
+      height: 6px;
       border-radius: 50%;
-      background: var(--c-text-muted);
+      background: var(--text-muted);
     }
-    .conn-indicator.connected .conn-dot { background: var(--c-success); }
-    .conn-indicator.connected { color: var(--c-success); }
-    .conn-indicator.failed .conn-dot { background: var(--c-danger); }
-    .conn-indicator.failed { color: var(--c-danger); }
+    .conn-pill.connected .conn-dot { background: var(--success); }
+    .conn-pill.connected { color: var(--success); border-color: rgba(16, 185, 129, 0.3); }
+    .conn-pill.failed .conn-dot { background: var(--danger); }
+    .conn-pill.failed { color: var(--danger); border-color: rgba(239, 68, 68, 0.3); }
 
-    /* ---------- Config bar ---------- */
-    .config {
-      background: var(--c-bg-alt-2);
-      border: 1px solid var(--c-border);
-      border-radius: 10px;
-      padding: 1.25rem;
-      margin-bottom: 1.75rem;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.75rem;
-      align-items: flex-end;
-    }
-    .field { flex: 1 1 220px; }
-    label {
-      display: block;
-      font-size: 0.78rem;
-      color: var(--c-text-muted);
-      margin-bottom: 0.35rem;
-    }
-    input {
-      width: 100%;
-      background: var(--c-bg);
-      border: 1px solid var(--c-border);
-      color: var(--c-text);
-      border-radius: 6px;
-      padding: 0.55rem 0.7rem;
-      font-size: 0.9rem;
-    }
-    input:focus { outline: 2px solid var(--c-teal); }
-    button {
-      background: var(--c-accent);
-      border: none;
-      color: #1A1206;
-      font-weight: 600;
-      padding: 0.6rem 1.25rem;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 0.9rem;
-      height: 38px;
-      transition: opacity 0.15s ease;
-    }
-    button:hover { background: #f5b876; }
-    button:disabled {
-      opacity: 0.55;
-      cursor: not-allowed;
-    }
-    button.secondary {
-      background: transparent;
-      border: 1px solid var(--c-border);
-      color: var(--c-text);
-    }
-    button.secondary:hover { border-color: var(--c-teal); background: transparent; }
-    button.danger {
-      background: transparent;
-      border: 1px solid var(--c-danger);
-      color: var(--c-danger);
-    }
-    button.danger:hover { background: rgba(224, 138, 138, 0.1); }
-
-    /* ---------- Section panels ---------- */
-    .panel {
-      background: var(--c-bg-alt-2);
-      border: 1px solid var(--c-border);
-      border-radius: 10px;
-      padding: 1.5rem;
-      margin-bottom: 1.75rem;
-    }
-    .panel-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      margin-bottom: 1.1rem;
-    }
-    .panel-head h2 {
-      font-size: 1.05rem;
-      margin: 0;
-    }
-    .panel-head .count {
-      font-size: 0.8rem;
-      font-family: monospace;
-      color: var(--c-text-muted);
-    }
-
-    .status {
-      font-size: 0.85rem;
-      margin: 0 0 1rem 0;
-      min-height: 1.2em;
-    }
-    .status.error { color: var(--c-danger); }
-    .status.ok { color: var(--c-success); }
-
-    /* ---------- Message cards ---------- */
-    .card {
-      background: var(--c-bg);
-      border: 1px solid var(--c-border);
-      border-radius: 10px;
-      padding: 1.25rem;
-      margin-bottom: 1rem;
-    }
-    .card:last-child { margin-bottom: 0; }
-    .card-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      margin-bottom: 0.5rem;
-    }
-    .name { font-weight: 600; }
-    .date {
-      font-size: 0.75rem;
-      color: var(--c-text-muted);
-      font-family: monospace;
-    }
-    .subject {
-      color: var(--c-accent);
-      font-size: 0.92rem;
-      margin-bottom: 0.5rem;
-    }
-    .message {
-      color: var(--c-text-muted);
-      font-size: 0.92rem;
-      line-height: 1.6;
-      white-space: pre-wrap;
-      margin-bottom: 0.85rem;
-    }
-    .reply-link {
-      color: var(--c-teal);
-      font-size: 0.85rem;
-      text-decoration: none;
-    }
-    .reply-link:hover { text-decoration: underline; }
-    .empty {
-      color: var(--c-text-muted);
-      text-align: center;
-      padding: 2.5rem 0;
-      font-size: 0.9rem;
-    }
-
-    /* ---------- Resume panel ---------- */
-    .resume-card {
-      background: var(--c-bg);
-      border: 1px solid var(--c-border);
-      border-radius: 10px;
-      padding: 1.25rem;
-    }
-    .resume-state {
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      margin-bottom: 1.1rem;
-      font-size: 0.92rem;
-    }
-    .resume-state .badge {
-      font-size: 0.7rem;
-      font-family: monospace;
-      padding: 0.2rem 0.55rem;
-      border-radius: 20px;
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
-    }
-    .resume-state .badge.uploaded {
-      background: rgba(127, 217, 160, 0.12);
-      color: var(--c-success);
-      border: 1px solid rgba(127, 217, 160, 0.3);
-    }
-    .resume-state .badge.missing {
-      background: rgba(138, 155, 168, 0.12);
-      color: var(--c-text-muted);
-      border: 1px solid var(--c-border);
-    }
-    .resume-meta {
-      color: var(--c-text-muted);
-      font-size: 0.85rem;
-      margin: 0 0 1.1rem 0;
-      line-height: 1.6;
-    }
-    .resume-meta a {
-      color: var(--c-teal);
-      text-decoration: none;
-    }
-    .resume-meta a:hover { text-decoration: underline; }
     .resume-controls {
       display: flex;
       flex-wrap: wrap;
-      gap: 0.6rem;
+      gap: 0.75rem;
       align-items: center;
+      margin-top: 1rem;
     }
-    .resume-controls input[type="file"] {
-      flex: 1 1 220px;
-      font-size: 0.82rem;
+
+    input[type="file"] {
+      background: #090d14;
+      border: 1px dashed var(--border-color);
+      color: var(--text-muted);
+      border-radius: 4px;
       padding: 0.4rem;
+      font-size: 0.8rem;
     }
-    .resume-status {
+
+    .empty-state {
+      text-align: center;
+      color: var(--text-muted);
+      padding: 2.5rem;
       font-size: 0.85rem;
-      margin-top: 0.9rem;
-      min-height: 1.2em;
     }
-    .resume-status.error { color: var(--c-danger); }
-    .resume-status.ok { color: var(--c-success); }
+
+    .action-link {
+      color: #3b82f6;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .action-link:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="page-header">
-      <div>
-        <h1>Portfolio Admin</h1>
-        <p class="sub">Private dashboard — not linked from the public site.</p>
+  <div class="dashboard-container">
+    
+    <div class="dashboard-header">
+      <div class="dashboard-title">
+        <h1>Portfolio Infrastructure &amp; Admin</h1>
+        <p>Manage backend configurations, contact payloads, and system documents.</p>
       </div>
-      <span class="conn-indicator" id="connIndicator">
+      <div class="conn-pill" id="connIndicator">
         <span class="conn-dot"></span>
         <span id="connLabel">not connected</span>
-      </span>
+      </div>
     </div>
 
-    <div class="config">
+    <ul class="nav-tabs">
+      <li class="active">Overview &amp; Telemetry</li>
+      <li>Messaging Logs</li>
+      <li>Document Storage</li>
+    </ul>
+
+    <div class="config-bar">
       <div class="field">
-        <label for="apiUrl">API URL</label>
-        <input id="apiUrl" placeholder="https://your-api.onrender.com" />
+        <label for="apiUrl">API Base URL</label>
+        <input id="apiUrl" type="text" placeholder="https://your-api.onrender.com" />
       </div>
       <div class="field">
-        <label for="token">Admin Token</label>
-        <input id="token" type="password" placeholder="Your ADMIN_TOKEN" />
+        <label for="token">Admin Access Token</label>
+        <input id="token" type="password" placeholder="ADMIN_TOKEN string" />
       </div>
-      <button id="loadBtn">Connect &amp; load</button>
+      <button class="btn" id="loadBtn">Connect &amp; Authenticate</button>
     </div>
 
-    <!-- ---------- Resume panel ---------- -->
-    <section class="panel">
-      <div class="panel-head">
-        <h2>Resume</h2>
+    <!-- Summary Metrics Cards -->
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-title">Total Messages Logged</div>
+        <div class="metric-value" id="metricMsgCount">0</div>
+        <div class="metric-subtext">Active inbound inquiries</div>
       </div>
-
-      <div class="resume-card">
-        <div class="resume-state">
-          <span class="badge missing" id="resumeBadge">checking…</span>
-        </div>
-        <p class="resume-meta" id="resumeMeta"></p>
-
-        <div class="resume-controls">
-          <input type="file" id="resumeFile" accept="application/pdf" />
-          <button id="uploadResumeBtn">Upload / Replace</button>
-          <button id="deleteResumeBtn" class="danger">Remove</button>
-          <button id="refreshResumeBtn" class="secondary">Refresh</button>
-        </div>
-
-        <p class="resume-status" id="resumeStatus"></p>
+      <div class="metric-card neutral">
+        <div class="metric-title">Resume Deployment Status</div>
+        <div class="metric-value" id="metricResumeStatus" style="font-size: 1.25rem; margin-top: 0.5rem;">Checking...</div>
+        <div class="metric-subtext" id="metricResumeSub">API target endpoint sync</div>
       </div>
-    </section>
+    </div>
 
-    <!-- ---------- Messages panel ---------- -->
-    <section class="panel">
-      <div class="panel-head">
-        <h2>Contact Messages</h2>
-        <span class="count" id="msgCount"></span>
+    <!-- Resume Management Panel -->
+    <div class="panel">
+      <div class="panel-header">
+        <h2>Document Management (Resume PDF)</h2>
+        <span id="resumeBadgeContainer"><span class="badge missing" id="resumeBadge">unverified</span></span>
       </div>
-      <p class="status" id="status"></p>
-      <div id="results"></div>
-    </section>
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;" id="resumeMeta">Connect API URL to check current remote state.</p>
+      
+      <div class="resume-controls">
+        <input type="file" id="resumeFile" accept="application/pdf" />
+        <button class="btn" id="uploadResumeBtn">Upload / Replace</button>
+        <button class="btn btn-danger" id="deleteResumeBtn">Remove File</button>
+        <button class="btn btn-secondary" id="refreshResumeBtn">Refresh Status</button>
+      </div>
+      <div class="status-msg" id="resumeStatus"></div>
+    </div>
+
+    <!-- Contact Messages Breakdown Panel -->
+    <div class="panel">
+      <div class="panel-header">
+        <h2>Inbound Contact Messages</h2>
+        <span style="font-size: 0.75rem; font-family: monospace; color: var(--text-muted);" id="msgCountBadge">0 records</span>
+      </div>
+      <div class="status-msg" id="status"></div>
+      
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Sender Name &amp; Email</th>
+              <th>Subject</th>
+              <th>Message Body</th>
+              <th>Timestamp</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="resultsTableBody">
+            <tr>
+              <td colspan="5" class="empty-state">No connection established or record list is empty.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
   </div>
 
   <script>
     const apiUrlInput = document.getElementById("apiUrl");
     const tokenInput = document.getElementById("token");
     const statusEl = document.getElementById("status");
-    const resultsEl = document.getElementById("results");
+    const resultsTableBody = document.getElementById("resultsTableBody");
     const loadBtn = document.getElementById("loadBtn");
-    const msgCountEl = document.getElementById("msgCount");
+    const msgCountBadge = document.getElementById("msgCountBadge");
+    const metricMsgCount = document.getElementById("metricMsgCount");
+    const metricResumeStatus = document.getElementById("metricResumeStatus");
+    const metricResumeSub = document.getElementById("metricResumeSub");
     const connIndicator = document.getElementById("connIndicator");
     const connLabel = document.getElementById("connLabel");
 
@@ -350,9 +453,6 @@
     const deleteResumeBtn = document.getElementById("deleteResumeBtn");
     const refreshResumeBtn = document.getElementById("refreshResumeBtn");
 
-    // Convenience only — saved in this browser's localStorage so you don't
-    // retype it every visit. Never checked into git; this file has no
-    // secrets baked in.
     apiUrlInput.value = localStorage.getItem("admin_api_url") || "";
     tokenInput.value = localStorage.getItem("admin_token") || "";
 
@@ -389,24 +489,21 @@
       }
     }
 
-    // ---------- Messages ----------
-
     async function loadMessages() {
       const { apiUrl, token } = getCreds();
 
       if (!apiUrl || !token) {
         statusEl.textContent = "Enter both the API URL and your admin token.";
-        statusEl.className = "status error";
+        statusEl.className = "status-msg error";
         return;
       }
 
       localStorage.setItem("admin_api_url", apiUrl);
       localStorage.setItem("admin_token", token);
 
-      statusEl.textContent = "Loading...";
-      statusEl.className = "status";
-      resultsEl.innerHTML = "";
-      msgCountEl.textContent = "";
+      statusEl.textContent = "Syncing messages from server...";
+      statusEl.className = "status-msg";
+      resultsTableBody.innerHTML = `<tr><td colspan="5" class="empty-state">Loading table items...</td></tr>`;
 
       try {
         const res = await fetch(`${apiUrl}/api/admin/messages`, {
@@ -414,20 +511,20 @@
         });
 
         if (res.status === 401) {
-          statusEl.textContent = "Invalid admin token.";
-          statusEl.className = "status error";
+          statusEl.textContent = "Invalid admin token credentials.";
+          statusEl.className = "status-msg error";
           setConnIndicator("failed");
           return;
         }
         if (res.status === 404) {
-          statusEl.textContent = "Admin endpoint is disabled (ADMIN_TOKEN not set on the server).";
-          statusEl.className = "status error";
+          statusEl.textContent = "Admin endpoint is disabled or missing on server configuration.";
+          statusEl.className = "status-msg error";
           setConnIndicator("failed");
           return;
         }
         if (!res.ok) {
-          statusEl.textContent = `Request failed (${res.status}).`;
-          statusEl.className = "status error";
+          statusEl.textContent = `Request failed with error status code (${res.status}).`;
+          statusEl.className = "status-msg error";
           setConnIndicator("failed");
           return;
         }
@@ -435,33 +532,32 @@
         setConnIndicator("connected");
         const messages = await res.json();
         statusEl.textContent = "";
-        msgCountEl.textContent = `${messages.length} message${messages.length === 1 ? "" : "s"}`;
+        msgCountBadge.textContent = `${messages.length} record${messages.length === 1 ? "" : "s"}`;
+        metricMsgCount.textContent = messages.length;
 
         if (messages.length === 0) {
-          resultsEl.innerHTML = '<p class="empty">No messages yet.</p>';
+          resultsTableBody.innerHTML = `<tr><td colspan="5" class="empty-state">No messages recorded yet.</td></tr>`;
           return;
         }
 
-        resultsEl.innerHTML = messages
+        resultsTableBody.innerHTML = messages
           .map((m) => {
             const mailtoSubject = encodeURIComponent(`Re: ${m.subject || ""}`);
             const mailtoHref = `mailto:${encodeURIComponent(m.email)}?subject=${mailtoSubject}`;
             return `
-              <div class="card">
-                <div class="card-head">
-                  <span class="name">${escapeHtml(m.name || "")} &lt;${escapeHtml(m.email || "")}&gt;</span>
-                  <span class="date">${formatDate(m.received_at)}</span>
-                </div>
-                <div class="subject">${escapeHtml(m.subject || "")}</div>
-                <div class="message">${escapeHtml(m.message || "")}</div>
-                <a class="reply-link" href="${mailtoHref}">Reply via email →</a>
-              </div>
+              <tr>
+                <td><strong>${escapeHtml(m.name || "")}</strong><br><span style="color:var(--text-muted); font-size:0.75rem;">${escapeHtml(m.email || "")}</span></td>
+                <td>${escapeHtml(m.subject || "N/A")}</td>
+                <td style="max-width:350px; white-space:pre-wrap; color:var(--text-muted);">${escapeHtml(m.message || "")}</td>
+                <td style="font-family:monospace; font-size:0.75rem; color:var(--text-muted);">${formatDate(m.received_at)}</td>
+                <td><a class="action-link" href="${mailtoHref}">Reply →</a></td>
+              </tr>
             `;
           })
           .join("");
       } catch (err) {
-        statusEl.textContent = `Couldn't reach the API: ${err.message}`;
-        statusEl.className = "status error";
+        statusEl.textContent = `Network connection failure: ${err.message}`;
+        statusEl.className = "status-msg error";
         setConnIndicator("failed");
       }
     }
@@ -471,28 +567,28 @@
       loadResumeStatus();
     });
 
-    // ---------- Resume ----------
-
     async function loadResumeStatus() {
       const { apiUrl } = getCreds();
 
       if (!apiUrl) {
         resumeBadge.textContent = "no api url";
         resumeBadge.className = "badge missing";
-        resumeMeta.textContent = "";
+        resumeMeta.textContent = "API URL is missing.";
+        metricResumeStatus.textContent = "Not Configured";
         return;
       }
 
       resumeBadge.textContent = "checking…";
       resumeBadge.className = "badge missing";
-      resumeMeta.textContent = "";
+      resumeMeta.textContent = "Querying resume status...";
 
       try {
         const res = await fetch(`${apiUrl}/api/resume/status`);
         if (!res.ok) {
           resumeBadge.textContent = "unavailable";
           resumeBadge.className = "badge missing";
-          resumeMeta.textContent = "Unable to load resume status.";
+          resumeMeta.textContent = "Unable to fetch remote resume status.";
+          metricResumeStatus.textContent = "Error";
           return;
         }
 
@@ -501,7 +597,9 @@
         if (!data.available) {
           resumeBadge.textContent = "no resume";
           resumeBadge.className = "badge missing";
-          resumeMeta.textContent = "No resume has been uploaded yet.";
+          resumeMeta.textContent = "No remote resume is currently uploaded.";
+          metricResumeStatus.textContent = "Missing";
+          metricResumeSub.textContent = "No active PDF found";
           return;
         }
 
@@ -509,13 +607,15 @@
         resumeBadge.className = "badge uploaded";
         const filename = escapeHtml(data.filename || "resume.pdf");
         const uploadedAt = data.uploaded_at ? formatDate(data.uploaded_at) : "unknown time";
-        resumeMeta.innerHTML =
-          `File: <strong>${filename}</strong> · uploaded ${uploadedAt} · ` +
-          `<a href="${apiUrl}/api/resume" target="_blank" rel="noopener noreferrer">Download</a>`;
+        
+        resumeMeta.innerHTML = `Active File: <strong>${filename}</strong> (Uploaded: ${uploadedAt}) · <a class="action-link" href="${apiUrl}/api/resume" target="_blank" rel="noopener noreferrer">Download PDF</a>`;
+        metricResumeStatus.textContent = "Active";
+        metricResumeSub.textContent = filename;
       } catch (err) {
         resumeBadge.textContent = "unreachable";
         resumeBadge.className = "badge missing";
-        resumeMeta.textContent = `Couldn't reach the API: ${err.message}`;
+        resumeMeta.textContent = `Target API is unreachable: ${err.message}`;
+        metricResumeStatus.textContent = "Unreachable";
       }
     }
 
@@ -523,19 +623,19 @@
       const { apiUrl, token } = getCreds();
 
       if (!apiUrl || !token) {
-        resumeStatus.textContent = "Enter both the API URL and your admin token above first.";
-        resumeStatus.className = "resume-status error";
+        resumeStatus.textContent = "Enter both API URL and admin token above.";
+        resumeStatus.className = "status-msg error";
         return;
       }
       if (!resumeFile.files.length) {
-        resumeStatus.textContent = "Choose a PDF file first.";
-        resumeStatus.className = "resume-status error";
+        resumeStatus.textContent = "Select a PDF file to upload.";
+        resumeStatus.className = "status-msg error";
         return;
       }
       const file = resumeFile.files[0];
       if (file.type !== "application/pdf") {
-        resumeStatus.textContent = "Only PDF files are accepted.";
-        resumeStatus.className = "resume-status error";
+        resumeStatus.textContent = "Only PDF files are supported.";
+        resumeStatus.className = "status-msg error";
         return;
       }
 
@@ -543,8 +643,8 @@
       formData.append("file", file);
 
       uploadResumeBtn.disabled = true;
-      resumeStatus.textContent = "Uploading...";
-      resumeStatus.className = "resume-status";
+      resumeStatus.textContent = "Uploading document payload...";
+      resumeStatus.className = "status-msg";
 
       try {
         const res = await fetch(`${apiUrl}/api/admin/resume`, {
@@ -556,24 +656,21 @@
         let data = {};
         try {
           data = await res.json();
-        } catch {
-          // Non-JSON response (e.g. a host-level error page) — fall through
-          // to the generic status-code message below.
-        }
+        } catch {}
 
         if (!res.ok) {
-          resumeStatus.textContent = `Upload failed: ${data.detail || res.status}`;
-          resumeStatus.className = "resume-status error";
+          resumeStatus.textContent = `Upload rejected: ${data.detail || res.status}`;
+          resumeStatus.className = "status-msg error";
           return;
         }
 
         resumeStatus.textContent = "Resume uploaded successfully.";
-        resumeStatus.className = "resume-status ok";
+        resumeStatus.className = "status-msg ok";
         resumeFile.value = "";
         loadResumeStatus();
       } catch (err) {
-        resumeStatus.textContent = `Upload failed: ${err.message}`;
-        resumeStatus.className = "resume-status error";
+        resumeStatus.textContent = `Upload process failed: ${err.message}`;
+        resumeStatus.className = "status-msg error";
       } finally {
         uploadResumeBtn.disabled = false;
       }
@@ -583,17 +680,17 @@
       const { apiUrl, token } = getCreds();
 
       if (!apiUrl || !token) {
-        resumeStatus.textContent = "Enter both the API URL and your admin token above first.";
-        resumeStatus.className = "resume-status error";
+        resumeStatus.textContent = "Enter API URL and token first.";
+        resumeStatus.className = "status-msg error";
         return;
       }
-      if (!confirm("Remove the current resume? Visitors won't be able to download it until you upload a new one.")) {
+      if (!confirm("Are you sure you want to remove the current resume? Public downloads will fail until replaced.")) {
         return;
       }
 
       deleteResumeBtn.disabled = true;
-      resumeStatus.textContent = "Removing...";
-      resumeStatus.className = "resume-status";
+      resumeStatus.textContent = "Deleting document...";
+      resumeStatus.className = "status-msg";
 
       try {
         const res = await fetch(`${apiUrl}/api/admin/resume`, {
@@ -604,22 +701,20 @@
         let data = {};
         try {
           data = await res.json();
-        } catch {
-          // Non-JSON response — fall through to generic status message.
-        }
+        } catch {}
 
         if (!res.ok) {
-          resumeStatus.textContent = `Remove failed: ${data.detail || res.status}`;
-          resumeStatus.className = "resume-status error";
+          resumeStatus.textContent = `Deletion failed: ${data.detail || res.status}`;
+          resumeStatus.className = "status-msg error";
           return;
         }
 
-        resumeStatus.textContent = "Resume removed.";
-        resumeStatus.className = "resume-status ok";
+        resumeStatus.textContent = "Resume removed from server.";
+        resumeStatus.className = "status-msg ok";
         loadResumeStatus();
       } catch (err) {
-        resumeStatus.textContent = `Remove failed: ${err.message}`;
-        resumeStatus.className = "resume-status error";
+        resumeStatus.textContent = `Deletion error: ${err.message}`;
+        resumeStatus.className = "status-msg error";
       } finally {
         deleteResumeBtn.disabled = false;
       }
@@ -627,7 +722,6 @@
 
     refreshResumeBtn.addEventListener("click", loadResumeStatus);
 
-    // Auto-load if both fields already have saved values.
     if (apiUrlInput.value && tokenInput.value) {
       loadMessages();
       loadResumeStatus();

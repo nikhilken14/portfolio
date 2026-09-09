@@ -1,39 +1,45 @@
 :root {
-  /* ---- Design tokens : terminal theme ---- */
-  --c-bg: #000000;
-  --c-bg-alt: #060a08;
-  --c-bg-alt-2: #0a0f0d;
-  --c-glass: rgba(6, 12, 10, 0.6);
-  --c-glass-strong: rgba(4, 8, 7, 0.9);
+  /* ---- Design Tokens: Minimalist High-Contrast Light Theme ---- */
+  --c-bg: #0a2540;
+  --c-surface: #0070f3;
+  --c-surface-2: #fafafa;
+  --c-glass: rgba(255, 255, 255, 0.85);
+  --c-glass-strong: rgba(255, 255, 255, 0.95);
 
-  --c-text: #d9ffe4;
-  --c-text-muted: #5f8f74;
-  --c-text-dim: #35513f;
+  /* High contrast text hierarchy */
+  --c-text: #000000;
+  --c-text-muted: #4a4d52;
+  --c-text-dim: #717680;
 
-  /* Only two signal hues in this theme: terminal green (primary) and
-     electric blue (secondary/system). No other colors are introduced. */
-  --c-accent: #3ba7ff;
-  --c-accent-rgb: 59, 167, 255;
-  --c-accent-soft: rgba(59, 167, 255, 0.12);
-  --c-accent-2: #39ff6a;
-  --c-accent-2-rgb: 57, 255, 106;
-  --c-accent-2-soft: rgba(57, 255, 106, 0.12);
-  --c-warn: var(--c-accent);
+  /* Accent family (Soft Lavender / Violet) */
+  --c-accent: #8b7cff;
+  --c-accent-rgb: 139, 124, 255;
+  --c-accent-soft: rgba(139, 124, 255, 0.12);
+  --c-accent-2: #705eff;
+  --c-accent-2-rgb: 112, 94, 255;
+  --c-accent-2-soft: rgba(112, 94, 255, 0.08);
 
-  --c-teal: var(--c-accent-2);
-  --c-teal-soft: var(--c-accent-2-soft);
+  /* Status / Indicator tokens */
+  --c-success: #22c55e;
+  --c-success-rgb: 34, 197, 94;
+  --c-teal: var(--c-success);
+  --c-teal-soft: rgba(34, 197, 94, 0.15);
 
-  --c-border: rgba(57, 255, 106, 0.16);
-  --c-border-strong: rgba(57, 255, 106, 0.32);
+  /* Structural solid black borders */
+  --c-border: #000000;
+  --c-border-strong: #000000;
 
-  --font-display: "JetBrains Mono", monospace;
-  --font-body: "JetBrains Mono", monospace;
+  /* Typography */
+  --font-display: "Inter Tight", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: "JetBrains Mono", monospace;
 
-  --container-max: 1180px;
+  /* Layout */
+  --container-max: absolute;
 
-  --glow-accent: 0 0 22px -4px rgba(var(--c-accent-rgb), 0.6);
-  --glow-accent-2: 0 0 22px -4px rgba(var(--c-accent-2-rgb), 0.6);
+  /* Subtle elevations & Easings */
+  --glow-accent: 0 8px 24px -6px rgba(var(--c-accent-rgb), 0.35);
+  --glow-accent-2: 0 8px 24px -6px rgba(var(--c-accent-2-rgb), 0.35);
   --ease-signal: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -43,6 +49,7 @@
 
 html {
   scroll-behavior: smooth;
+  font-size: 16px;
 }
 
 body {
@@ -51,55 +58,70 @@ body {
   color: var(--c-text);
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   position: relative;
-  min-height: 100vh;
+  overflow-x: hidden;
 }
 
-/* Faint green circuit grid + CRT scanlines behind the whole document */
+/* Structural grid overlay behind the document */
 body::before {
   content: "";
   position: fixed;
   inset: 0;
   z-index: -2;
   pointer-events: none;
-  background-image: linear-gradient(var(--c-border) 1px, transparent 1px),
-    linear-gradient(90deg, var(--c-border) 1px, transparent 1px);
-  background-size: 56px 56px;
-  opacity: 0.3;
-  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 10%, transparent 75%);
-}
-
-body::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background: repeating-linear-gradient(
-    to bottom,
-    rgba(57, 255, 106, 0.025) 0px,
-    rgba(57, 255, 106, 0.025) 1px,
-    transparent 1px,
-    transparent 3px
-  );
-  mix-blend-mode: overlay;
+  background-image: 
+    linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+  background-size: 100px 100px;
+  opacity: 0.6;
+  mask-image: radial-gradient(ellipse 90% 60% at 50% 0%, black 10%, transparent 80%);
 }
 
 a {
-  color: var(--c-accent-2);
+  color: inherit;
   text-decoration: none;
 }
 
 ::selection {
-  background: var(--c-accent-2);
-  color: #000;
+  background: var(--c-accent);
+  color: #000000;
 }
 
-::-webkit-scrollbar { width: 10px; }
-::-webkit-scrollbar-track { background: var(--c-bg); }
-::-webkit-scrollbar-thumb { background: var(--c-border-strong); border-radius: 6px; }
-::-webkit-scrollbar-thumb:hover { background: var(--c-accent-2); }
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
 
+/* Hide scrollbar for Firefox and IE/Edge */
+html, body {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+::-webkit-scrollbar-track {
+  background: var(--c-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--c-accent);
+}
+
+/* Focus States */
+:focus-visible {
+  outline: 2px solid var(--c-accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Reduced Motion Safety */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -107,10 +129,4 @@ a {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-}
-
-:focus-visible {
-  outline: 2px solid var(--c-accent-2);
-  outline-offset: 3px;
-  border-radius: 2px;
 }

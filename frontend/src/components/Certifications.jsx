@@ -1,73 +1,67 @@
-import { Container, Row, Col } from "react-bootstrap";
 import Reveal from "./Reveal";
 import "./Certifications.css";
 
 export default function Certifications({ certifications }) {
-  return (
-    <section id="certifications" className="section">
-      <Container className="container-narrow">
-        <Reveal>
-          <p className="eyebrow">certifications.verify()</p>
-        </Reveal>
+  // Duplicate array to ensure a seamless infinite marquee loop
+  const infiniteCertifications = [...certifications, ...certifications];
 
-        <Reveal delay={1}>
-          <h2 className="section-title">
-            <span className="section-title__accent">Certifications</span>
+  return (
+    <section id="certifications" className="sci-certifications">
+      <Reveal delay={1}>
+          <h2 className="sci-section-title">
+            Certifications
           </h2>
         </Reveal>
 
         <Reveal delay={2}>
-          <p className="section-sub">
+          <p className="sci-section-sub">
             Credentials that validate my technical expertise.
           </p>
         </Reveal>
 
-        <Row className="gy-4">
-          {certifications.map((cert, i) => (
-            <Col md={6} lg={4} key={cert.id}>
-              <Reveal delay={(i % 4) + 1}>
-                <a
-                  href={cert.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="cert-card text-decoration-none"
-                >
-                  <div className="panel-card h-100">
+      {/* Marquee Wrapper */}
+      <div className="sci-marquee-container">
+        <div className="sci-marquee-track">
+          {infiniteCertifications.map((cert, i) => (
+            <a
+              href={cert.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              key={`${cert.id}-${i}`}
+              className="sci-cert-card text-decoration-none"
+            >
+              <div className="sci-panel-card h-100">
+                <div className="sci-card-badge-frame">
+                  <img
+                    src={cert.badge}
+                    alt={cert.name}
+                    className="sci-card-badge"
+                  />
+                </div>
 
-                    <div className="cert-card__badge-frame">
-                      <img
-                        src={cert.badge}
-                        alt={cert.name}
-                        className="cert-card__badge"
-                      />
-                    </div>
+                <h3 className="sci-card-name">
+                  {cert.name}
+                </h3>
 
-                    <h3 className="cert-card__name">
-                      {cert.name}
-                    </h3>
+                <div className="sci-card-issuer">
+                  {cert.issuer}
+                </div>
 
-                    <div className="cert-card__issuer">
-                      {cert.issuer}
-                    </div>
-
-                    {cert.date && (
-                      <div className="cert-card__date">
-                        {cert.date}
-                      </div>
-                    )}
-
-                    <div className="cert-card__view">
-                      View Certificate
-                      <i className="bi bi-arrow-up-right"></i>
-                    </div>
-
+                {cert.date && (
+                  <div className="sci-card-date">
+                    {cert.date}
                   </div>
-                </a>
-              </Reveal>
-            </Col>
+                )}
+
+                <div className="sci-card-view">
+                  View Certificate
+                  <i className="bi bi-arrow-up-right"></i>
+                </div>
+              </div>
+            </a>
           ))}
-        </Row>
-      </Container>
+        </div>
+      </div>
     </section>
   );
 }

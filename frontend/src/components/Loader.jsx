@@ -1,27 +1,27 @@
 import { useEffect, useState } from "react";
 import "./Loader.css";
 
-export default function Loader() {
+export default function Loader({ onFinished }) {
   const [pct, setPct] = useState(0);
 
   useEffect(() => {
-    // Purely cosmetic progress readout — resolves once real data arrives,
-    // but eases toward 90% in the meantime so it never looks stalled.
     const interval = setInterval(() => {
-      setPct((p) => (p < 90 ? p + Math.max(1, Math.round((90 - p) / 10)) : p));
-    }, 120);
+      setPct((p) => {
+        if (p >= 100) {
+          clearInterval(interval);
+          if (onFinished) onFinished();
+          return 100;
+        }
+        return p + Math.max(1, Math.round((100 - p) / 8));
+      });
+    }, 80);
+
     return () => clearInterval(interval);
-  }, []);
+  }, [onFinished]);
 
   return (
     <div className="loader">
-      <div className="loader__grid" aria-hidden="true" />
-      <div className="loader__mark">
-        <span className="loader__bracket">{"<"}</span>
-        <span className="loader__dot" />
-        <span className="loader__bracket">{"/>"}</span>
-      </div>
-      <p className="loader__text">initializing portfolio…</p>
+      <p className="loader__mark">Nikhil Kenjale</p>
       <div className="loader__bar">
         <div className="loader__bar-fill" style={{ width: `${pct}%` }} />
       </div>
