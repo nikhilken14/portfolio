@@ -111,10 +111,9 @@ PROFILE = {
     "leetcode": "https://leetcode.com/u/nikhilkenjale/",
     "resume_url": "/static/resume.pdf",
     "about": (
-        "Software Engineer with expertise in Java, Spring Boot, Python, and React. "
-        "Passionate about building scalable REST APIs, backend systems, and AI-powered "
-        "applications using clean architecture, modern development practices, and cloud "
-        "technologies."
+        "Computer Engineering graduate with hands-on experience in Java, Spring Boot, Python, React, and AI/ML. "
+        "Passionate about building full-stack applications, scalable REST APIs, backend systems, and AI-powered "
+        "solutions using clean architecture, problem-solving, modern development practices, and cloud technologies."
     ),
 }
 
@@ -123,7 +122,6 @@ SKILLS: List[Skill] = [
     Skill(name="Java", level=88, category="Programming"),
     Skill(name="Python", level=92, category="Programming"),
     Skill(name="SQL", level=88, category="Programming"),
-    Skill(name="JavaScript", level=70, category="Programming"),
     Skill(name="Bash", level=75, category="Programming"),
 
     # Frontend
@@ -135,7 +133,6 @@ SKILLS: List[Skill] = [
     # Backend
     Skill(name="FastAPI", level=90, category="Backend"),
     Skill(name="Spring Boot", level=82, category="Backend"),
-    Skill(name="Express.js", level=80, category="Backend"),
     Skill(name="Node.js", level=80, category="Backend"),
 
     # AI / Machine Learning
@@ -156,7 +153,6 @@ SKILLS: List[Skill] = [
     Skill(name="MySQL", level=86, category="Database"),
     Skill(name="MongoDB", level=80, category="Database"),
     Skill(name="Redis", level=65, category="Database"),
-    Skill(name="ChromaDB (Vector DB)", level=72, category="Database"),
 
     # DevOps & Tools
     Skill(name="Git / GitHub", level=92, category="Tools"),
@@ -284,13 +280,13 @@ EXPERIENCE: List[Experience] = [
     ),
     Experience(
         id=2,
-        role="Software Development Trainee",
-        company="TNS India Foundation",
-        duration="Feb 2025 — Apr 2025",
+        role="AI Intern",
+        company="TechSaksham",
+        duration="Mar 2025 — Apr 2025",
         description=[
-            "Developed backend modules using Java, Spring Boot, and PostgreSQL following RESTful API and object-oriented design principles.",
-            "Built and tested APIs from requirement gathering through implementation, debugging, and mentor-led code reviews.",
-            "Worked in Agile sprints, participating in planning sessions, task management, and peer code reviews to improve software quality.",
+            "Performed data preprocessing, feature engineering, and exploratory data analysis (EDA) on real-world healthcare datasets to identify patterns supporting disease-prediction use cases.",
+            "Developed and evaluated machine learning models including Logistic Regression, Support Vector Machine (SVM), and Random Forest using Accuracy, Precision, Recall, and F1-Score.",
+            "Compared model performance, analyzed evaluation results, and presented findings to identify the most effective solution for the given dataset."
         ],
     ),
 ]
