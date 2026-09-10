@@ -17,7 +17,6 @@
   margin: 0 auto;
 }
 
-/* Typography & Headings */
 .contact-headline {
   font-size: 4.8rem;
   font-weight: 700;
@@ -92,7 +91,7 @@
 .blue-submit-btn {
   margin-top: 1.25rem;
   width: 100%;
-  background: #0080ff;
+  background: #f72585;
   border: none;
   border-radius: 8px;
   color: #ffffff;

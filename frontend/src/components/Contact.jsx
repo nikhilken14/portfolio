@@ -21,7 +21,7 @@ export default function Contact({ profile }) {
       await postContact(form);
       setStatus({
         state: "success",
-        message: "Message received — I'll get back to you soon.",
+        message: "Message received I'll get back to you soon.",
       });
       setForm(INITIAL_FORM);
     } catch (err) {
