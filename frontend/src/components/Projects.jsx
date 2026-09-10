@@ -9,13 +9,20 @@ const HEADER_GRADIENTS = [
   "linear-gradient(135deg, #1a1e2e, #1f0f3d)",
 ];
 
-// Picks a Bootstrap Icon based on the project's tags, so the header icon
-// actually reflects the domain (AI/agent work, backend, frontend, infra, data).
+// Picks a Bootstrap Icon based on the project's tags. Checked most-specific
+// first, so e.g. a fine-tuning project and a RAG-agent project - both "AI" -
+// still land on different icons instead of collapsing into one bi-cpu bucket.
 function getProjectIcon(tags = []) {
   const t = tags.map((x) => x.toLowerCase());
   const has = (...keys) => t.some((tag) => keys.some((k) => tag.includes(k)));
 
-  if (has("rag", "langchain", "langgraph", "agent", "llm", "qwen", "qlora", "peft", "hugging"))
+  if (has("qlora", "peft", "unsloth", "trl", "lora", "fine-tun"))
+    return "bi-sliders2";
+  if (has("ocr", "math", "calculator"))
+    return "bi-calculator";
+  if (has("langgraph", "multi-agent", "judge", "researcher"))
+    return "bi-share";
+  if (has("rag", "agent", "langchain", "llm", "qwen", "chromadb"))
     return "bi-cpu";
   if (has("react", "frontend"))
     return "bi-window-stack";
