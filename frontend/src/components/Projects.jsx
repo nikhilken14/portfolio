@@ -35,12 +35,8 @@ function getProjectIcon(tags = []) {
   return "bi-diagram-3";
 }
 
-const MAX_VISIBLE_TAGS = 3;
-
 function ProjectRow({ project, index }) {
   const tags = project.tags || [];
-  const visibleTags = tags.slice(0, MAX_VISIBLE_TAGS);
-  const extraCount = tags.length - visibleTags.length;
   const gradient = HEADER_GRADIENTS[index % HEADER_GRADIENTS.length];
   const icon = getProjectIcon(tags);
 
@@ -65,14 +61,11 @@ function ProjectRow({ project, index }) {
         <p className="project-card__desc">{project.description}</p>
 
         <div className="project-card__tags">
-          {visibleTags.map((tag) => (
+          {tags.map((tag) => (
             <span className="tag-chip" key={tag}>
               {tag}
             </span>
           ))}
-          {extraCount > 0 && (
-            <span className="tag-chip tag-chip--more">+{extraCount}</span>
-          )}
         </div>
 
         <div className="project-card__footer">

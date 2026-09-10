@@ -75,14 +75,14 @@
    visual anchor instead of nine identical text blocks in a row. */
 .project-card__header {
   position: relative;
-  height: 110px;
+  height: 170px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .project-card__icon {
-  font-size: 2.25rem;
+  font-size: 3.25rem;
   color: rgba(247, 37, 133, 0.4);
 }
 
