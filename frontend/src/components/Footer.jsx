@@ -2,6 +2,7 @@ import React from "react";
 import { Container, Row, Col } from "react-bootstrap";
 import { FaArrowUp, FaGithub, FaLinkedin, FaKaggle, FaDownload } from "react-icons/fa";
 import { SiLeetcode } from "react-icons/si";
+import { RESUME_DOWNLOAD_URL } from "./api"; // Adjust the path to your api file if needed
 import "./Footer.css";
 
 export default function Footer({ profile }) {
@@ -21,17 +22,16 @@ export default function Footer({ profile }) {
             <div>
               <h2 className="sharp-footer__name">{profile?.name || "Nikhil Kenjale"}</h2>
               <p className="sharp-footer__sub">{profile?.title || "Software Engineer"}</p>
-              
             </div>
             <a 
-                  href={profile?.resumeUrl || "/resume.pdf"} 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  download
-                  className="sharp-footer__resume-btn"
-                >
-                <FaDownload/> <span> Resume</span>
-                </a>
+              href={profile?.resumeUrl || RESUME_DOWNLOAD_URL} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              download
+              className="sharp-footer__resume-btn"
+            >
+              <FaDownload/> <span> Resume</span>
+            </a>
             
             <p className="sharp-footer__stack">BUILT WITH REACT & FASTAPI</p>
           </Col>
@@ -89,7 +89,6 @@ export default function Footer({ profile }) {
                     <SiLeetcode /> <span>LeetCode</span>
                   </a>
                 )}
-                
               </div>
             </div>
 
