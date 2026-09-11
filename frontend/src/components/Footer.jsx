@@ -1,15 +1,38 @@
-import React from "react";
+import React, { useState } from "react";
 import { Container, Row, Col } from "react-bootstrap";
-import { FaArrowUp, FaGithub, FaLinkedin, FaKaggle, FaDownload } from "react-icons/fa";
+import { FaArrowUp, FaGithub, FaLinkedin, FaKaggle, FaDownload, FaSpinner } from "react-icons/fa";
 import { SiLeetcode } from "react-icons/si";
-import { RESUME_DOWNLOAD_URL } from "../api/client";// Adjust the path to your api file if needed
+import client, { RESUME_DOWNLOAD_URL } from "../api/client"; // Adjust path to your client.js
 import "./Footer.css";
 
 export default function Footer({ profile }) {
   const year = new Date().getFullYear();
+  const [downloading, setDownloading] = useState(false);
 
   const backToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleResumeDownload = async (e) => {
+    e.preventDefault();
+    setDownloading(true);
+    try {
+      const response = await client.get("/api/resume", { responseType: "blob" });
+      const blob = new Blob([response.data], { type: "application/pdf" });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "Nikhil_Kenjale_Resume.pdf");
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      // Fallback to direct URL if blob download fails
+      window.open(RESUME_DOWNLOAD_URL, "_blank");
+    } finally {
+      setDownloading(false);
+    }
   };
 
   return (
@@ -24,13 +47,12 @@ export default function Footer({ profile }) {
               <p className="sharp-footer__sub">{profile?.title || "Software Engineer"}</p>
             </div>
             <a 
-              href={RESUME_DOWNLOAD_URL} 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              download
+              href="#download" 
+              onClick={handleResumeDownload}
               className="sharp-footer__resume-btn"
             >
-              <FaDownload/> <span> Resume</span>
+              {downloading ? <FaSpinner className="fa-spin" /> : <FaDownload />} 
+              <span> {downloading ? "Downloading..." : "Resume"}</span>
             </a>
             
             <p className="sharp-footer__stack">BUILT WITH REACT & FASTAPI</p>
