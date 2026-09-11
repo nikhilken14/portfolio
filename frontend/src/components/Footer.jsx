@@ -2,7 +2,7 @@ import React from "react";
 import { Container, Row, Col } from "react-bootstrap";
 import { FaArrowUp, FaGithub, FaLinkedin, FaKaggle, FaDownload } from "react-icons/fa";
 import { SiLeetcode } from "react-icons/si";
-import { RESUME_DOWNLOAD_URL } from "./api"; // Adjust the path to your api file if needed
+import { RESUME_DOWNLOAD_URL } from "../api/client";// Adjust the path to your api file if needed
 import "./Footer.css";
 
 export default function Footer({ profile }) {
@@ -24,7 +24,7 @@ export default function Footer({ profile }) {
               <p className="sharp-footer__sub">{profile?.title || "Software Engineer"}</p>
             </div>
             <a 
-              href={profile?.resumeUrl || RESUME_DOWNLOAD_URL} 
+              href={RESUME_DOWNLOAD_URL} 
               target="_blank" 
               rel="noopener noreferrer" 
               download
