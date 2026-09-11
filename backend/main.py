@@ -22,6 +22,7 @@ from database import (
     get_resume_meta,
     delete_resume,
 )
+from email_service import SMTP_HOST, SMTP_USER,SMTP_PORT,SMTP_PASSWORD,NOTIFY_EMAIL
 
 app = FastAPI(title="Portfolio API", version="1.0.0")
 
@@ -36,9 +37,9 @@ app.mount("/data", StaticFiles(directory="data"), name="data")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_credentials=False,
+    allow_methods=["GET", "POST"],
+    allow_headers=["Content-Type"],
 )
 
 # Simple shared-secret to protect the admin "view messages" endpoint.
@@ -497,3 +498,14 @@ def health_monitor():
             "message": "Backend is running"
         }
     )
+
+@app.get("/api/email-status")
+def email_status():
+    return {
+        "configured": is_email_configured(),
+        "smtp_user": bool(SMTP_USER),
+        "smtp_password": bool(SMTP_PASSWORD),
+        "notify_email": bool(NOTIFY_EMAIL),
+        "smtp_host": SMTP_HOST,
+        "smtp_port": SMTP_PORT,
+    }
