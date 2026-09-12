@@ -103,13 +103,14 @@ export default function AiCore3D() {
 
     window.addEventListener("mousemove", handleMouseMove);
 
-    // Animation Loop
+    // Animation Loop with THREE.Timer replacing THREE.Clock
     let animationFrameId;
-    let clock = new THREE.Clock();
+    const timer = new THREE.Timer();
 
-    const animate = () => {
+    const animate = (timestamp) => {
       animationFrameId = requestAnimationFrame(animate);
-      const elapsedTime = clock.getElapsedTime();
+      timer.update(timestamp);
+      const elapsedTime = timer.getElapsed();
 
       // Continuous 3D rotation
       outerMesh.rotation.y = elapsedTime * 0.15;
@@ -137,7 +138,7 @@ export default function AiCore3D() {
       renderer.render(scene, camera);
     };
 
-    animate();
+    animationFrameId = requestAnimationFrame(animate);
 
     // Handle Window Resize
     const handleResize = () => {
