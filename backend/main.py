@@ -1,511 +1,268 @@
-from fastapi import FastAPI, HTTPException, Header, UploadFile, File
-from fastapi.responses import Response
-from fastapi.responses import JSONResponse
+import logging
+import re
+import hashlib
+import base64
+import uuid
+import threading
+import time
+from collections import defaultdict, deque
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
+from cryptography.exceptions import InvalidSignature
+
+from fastapi import FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
+from fastapi.responses import Response
 from pydantic import BaseModel, EmailStr, Field
-from typing import List, Optional
-from dotenv import load_dotenv
 
-load_dotenv()
+import config
+import database as db
+import gmail_service as gmail
 
-import os
-from typing import Optional as Opt
+log = logging.getLogger("portfolio")
+logging.basicConfig(level=logging.INFO)
 
-from email_service import send_contact_notification, is_email_configured
-from database import (
-    save_contact_message,
-    list_contact_messages,
-    is_mongo_configured,
-    save_resume,
-    get_resume,
-    get_resume_meta,
-    delete_resume,
-)
-from email_service import SMTP_HOST, SMTP_USER,SMTP_PORT,SMTP_PASSWORD,NOTIFY_EMAIL
-
-app = FastAPI(title="Portfolio API", version="1.0.0")
-
-# Comma-separated list of allowed origins, e.g.
-# "https://your-site.netlify.app,http://localhost:5173"
-_raw_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173")
-ALLOWED_ORIGINS = [o.strip() for o in _raw_origins.split(",") if o.strip()]
-
-BASE_URL = os.getenv("BASE_URL")
-app.mount("/data", StaticFiles(directory="data"), name="data")
+app = FastAPI(title="Portfolio API", version="2.0.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=ALLOWED_ORIGINS,
+    allow_origins=config.ALLOWED_ORIGINS,
     allow_credentials=False,
-    allow_methods=["GET", "POST"],
+    # Only public browser requests need CORS; local admin uses server-to-server HTTPS.
+    allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["Content-Type"],
 )
 
-# Simple shared-secret to protect the admin "view messages" endpoint.
-ADMIN_TOKEN = os.getenv("ADMIN_TOKEN")
+
+# ---------- helpers ----------
+
+class RateLimiter:
+    """Sliding-window limiter keyed by client IP (single-instance, in-memory)."""
+
+    def __init__(self, limit: int, window: int):
+        self.limit, self.window = limit, window
+        self.hits: dict[str, deque] = defaultdict(deque)
+        self.lock = threading.Lock()
+
+    def allow(self, key: str) -> bool:
+        now = time.monotonic()
+        with self.lock:
+            q = self.hits[key]
+            while q and now - q[0] > self.window:
+                q.popleft()
+            if len(q) >= self.limit:
+                return False
+            q.append(now)
+            return True
 
 
-# ---------- Models ----------
+contact_limiter = RateLimiter(config.CONTACT_LIMIT, config.CONTACT_WINDOW_SECONDS)
+
+
+def client_ip(request: Request) -> str:
+    fwd = request.headers.get("x-forwarded-for")
+    return fwd.split(",")[0].strip() if fwd else (request.client.host if request.client else "?")
+
+
+# Replay cache: sufficient for a single Render worker; use shared Redis storage if
+# operating multiple workers/instances (otherwise replay rejection is per worker).
+_nonce_seen: dict[str, float] = {}
+_nonce_lock = threading.Lock()
+admin_limiter = RateLimiter(60, 60)
+
+
+def _public_key():
+    raw = config.ADMIN_PUBLIC_KEY_B64
+    if not raw:
+        raise HTTPException(404, "Not found")
+    try:
+        key = base64.b64decode(raw, validate=True)
+        if len(key) != 32:
+            raise ValueError("Invalid public key length")
+        return Ed25519PublicKey.from_public_bytes(key)
+    except (ValueError, TypeError):
+        log.error("ADMIN_PUBLIC_KEY_B64 invalid")
+        raise HTTPException(503, "Admin authentication is not configured")
+
+
+async def require_admin(request: Request):
+    """Verify an Ed25519 signature covering verb, path, timestamp, nonce and bytes."""
+    key = _public_key()
+    if not admin_limiter.allow(client_ip(request)):
+        raise HTTPException(429, "Rate limit exceeded")
+    timestamp = request.headers.get("X-Admin-Timestamp", "")
+    nonce = request.headers.get("X-Admin-Nonce", "")
+    sig_b64 = request.headers.get("X-Admin-Signature", "")
+    try:
+        ts = int(timestamp)
+        if abs(int(time.time()) - ts) > 90:
+            raise ValueError("expired")
+        if len(nonce) != 36 or str(uuid.UUID(nonce)) != nonce:
+            raise ValueError("invalid nonce")
+        signature = base64.b64decode(sig_b64, validate=True)
+        if len(signature) != 64:
+            raise ValueError("invalid signature length")
+    except (ValueError, TypeError):
+        raise HTTPException(401, "Invalid signed request")
+    content = await request.body()
+    # Query parameters are disallowed to avoid ambiguous canonicalization.
+    if request.url.query:
+        raise HTTPException(400, "Admin query parameters not supported")
+    canonical = "\n".join([request.method.upper(), request.url.path, timestamp, nonce, hashlib.sha256(content).hexdigest()]).encode()
+    try:
+        key.verify(signature, canonical)
+    except InvalidSignature:
+        raise HTTPException(401, "Invalid signed request")
+    with _nonce_lock:
+        now = time.monotonic()
+        for n, expiry in list(_nonce_seen.items()):
+            if expiry <= now:
+                del _nonce_seen[n]
+        if nonce in _nonce_seen:
+            raise HTTPException(401, "Request replay detected")
+        _nonce_seen[nonce] = now + 180
+
+
+
+@app.middleware("http")
+async def admin_signature_guard(request: Request, call_next):
+    if request.url.path.startswith("/api/admin/"):
+        try:
+            await require_admin(request)
+        except HTTPException as exc:
+            return Response(content='{"detail":"'+str(exc.detail)+'"}', status_code=exc.status_code, media_type="application/json")
+    return await call_next(request)
+
+
+# ---------- models ----------
 
 class ContactMessage(BaseModel):
     name: str = Field(..., min_length=2, max_length=80)
     email: EmailStr
     subject: str = Field(..., min_length=2, max_length=120)
     message: str = Field(..., min_length=5, max_length=2000)
+    website: str = Field("", max_length=200)  # honeypot: humans never fill this
 
 
-class Skill(BaseModel):
-    name: str
-    level: int  # 0-100
-    category: str
-
-
-class Project(BaseModel):
-    id: int
-    title: str
-    description: str
-    tags: List[str]
-    image: Optional[str] = None
-    github: Optional[str] = None
-    live: Optional[str] = None
-    featured: bool = False
-
-
-class Education(BaseModel):
-    id: int
-    degree: str
-    institution: str
-    duration: str
-    cgpa: Optional[str] = None
-    description: Optional[str] = None
-
-
-class Experience(BaseModel):
-    id: int
-    role: str
-    company: str
-    duration: str
-    description: List[str]
-
-
-class Certification(BaseModel):
-    id: int
-    name: str
-    issuer: str
-    date: Optional[str] = None
-    badge: str | None = None
-    url: Optional[str] = None
-
-
-# ---------- Portfolio data ----------
-
-PROFILE = {
-    "name": "Nikhil Kenjale",
-    "role": "Software Engineer",
-    "tagline": "Building scalable software, intelligent AI solutions, and modern web applications from backend to frontend.",
-    "location": "Pune, India",
-    "email": "nikhilkenjale1314@gmail.com",
-    "github": "https://github.com/nikhilken14",
-    "linkedin": "https://www.linkedin.com/in/nikhilkenjale1314a10/",
-    "kaggle": "https://www.kaggle.com/kenjalenikhil14",
-    "leetcode": "https://leetcode.com/u/nikhilkenjale/",
-    "resume_url": "/static/resume.pdf",
-    "about": (
-        "Computer Engineering graduate with hands-on experience in Java, Spring Boot, Python, React, and AI/ML. "
-        "Passionate about building full-stack applications, scalable REST APIs, backend systems, and AI-powered "
-        "solutions using clean architecture, problem-solving, modern development practices, and cloud technologies."
-    ),
-}
-
-SKILLS: List[Skill] = [
-    # Programming Languages
-    Skill(name="Java", level=88, category="Programming"),
-    Skill(name="Python", level=92, category="Programming"),
-    Skill(name="SQL", level=88, category="Programming"),
-    Skill(name="Bash", level=75, category="Programming"),
-
-    # Frontend
-    Skill(name="React.js", level=90, category="Frontend"),
-    Skill(name="HTML5", level=95, category="Frontend"),
-    Skill(name="CSS3", level=92, category="Frontend"),
-    Skill(name="Bootstrap", level=90, category="Frontend"),
-
-    # Backend
-    Skill(name="FastAPI", level=90, category="Backend"),
-    Skill(name="Spring Boot", level=82, category="Backend"),
-    Skill(name="Node.js", level=80, category="Backend"),
-
-    # AI / Machine Learning
-    Skill(name="Machine Learning", level=88, category="AI/ML"),
-    Skill(name="Deep Learning", level=78, category="AI/ML"),
-    Skill(name="PyTorch", level=78, category="AI/ML"),
-    Skill(name="Computer Vision (CNNs, Transfer Learning)", level=72, category="AI/ML"),
-
-    # GenAI
-    Skill(name="Retrieval-Augmented Generation (RAG)", level=82, category="GenAI"),
-    Skill(name="Large Language Models (LLMs)", level=80, category="GenAI"),
-    Skill(name="LangChain / LangGraph", level=75, category="GenAI"),        
-    Skill(name="Hugging Face Transformers", level=74, category="GenAI"),
-    Skill(name="QLoRA / PEFT Fine-Tuning", level=70, category="GenAI"),
-
-    # Databases
-    Skill(name="PostgreSQL", level=85, category="Database"),
-    Skill(name="MySQL", level=86, category="Database"),
-    Skill(name="MongoDB", level=80, category="Database"),
-    Skill(name="Redis", level=65, category="Database"),
-
-    # DevOps & Tools
-    Skill(name="Git / GitHub", level=92, category="Tools"),
-    Skill(name="Docker", level=75, category="Tools"),
-    Skill(name="Linux", level=80, category="Tools"),
-    Skill(name="Postman", level=85, category="Tools"),
-    Skill(name="AWS / OCI", level=70, category="Tools"),
-    Skill(name="Power BI", level=68, category="Tools"),
-]
-
-PROJECTS: List[Project] = [
-    Project(
-        id=1,
-        title="Supply Chain Order Assistant",
-        description="Built a production-style AI assistant for supply-chain operations using a ReAct-style agent that answers questions from ingested PDFs via RAG (with page-level citations) and calls tools against live order/shipment/inventory data — one chat interface handling both unstructured and structured queries.",
-        tags=["FastAPI", "React", "ReAct Agent", "RAG", "ChromaDB", "SQLite", "Qwen2.5"],
-        github="https://github.com/nikhilken14/supply-chain-order-assistant",
-        live="",
-        featured=True,
-    ),
-    Project(
-        id=2,
-        title="SupplyChainGPT — Fine-Tuning Qwen2.5-1.5B",
-        description="Fine-tuned Qwen2.5-1.5B-Instruct into a domain-specific supply-chain support assistant using QLoRA (4-bit NF4) with Unsloth and TRL's SFTTrainer, trained on a synthetic customer-support dataset for order tracking, refunds, and delivery updates — fully trainable on free GPU resources.",
-        tags=["QLoRA", "PEFT", "Unsloth", "Hugging Face Transformers", "TRL", "PyTorch"],
-        github="https://github.com/nikhilken14/QLoRA-FineTuning",
-        live="",
-        featured=True,
-    ),
-    Project(
-        id=3,
-        title="Math RAG Agent",
-        description="A multimodal (text / PDF / image) math assistant combining OCR and PDF extraction with a formula-retrieval RAG pipeline over ChromaDB, wrapped in a LangChain tool agent with per-session conversation memory and a FastAPI backend plus optional Streamlit demo UI.",
-        tags=["LangChain", "RAG", "ChromaDB", "FastAPI", "OCR", "Streamlit"],
-        github="https://github.com/nikhilken14/math-agent",
-        live="",
-        featured=True,
-    ),
-    Project(
-        id=4,
-        title="Groq Multi-Agent Content System",
-        description="A Researcher → Judge → Writer multi-agent pipeline built with LangGraph, where a Researcher gathers grounded findings via web search, a Judge returns a structured approve/revise verdict to drive a bounded revision loop, and a Writer compiles the approved research into a final Markdown article.",
-        tags=["LangGraph", "LangChain", "Groq API", "Multi-Agent Systems", "Streamlit"],
-        github="https://github.com/nikhilken14/Multi-Agent-Content-System",
-        live="",
-        featured=True,
-    ),
-    Project(
-        id=5,
-        title="US Fuel Price Forecasting",
-        description="Forecasted US fuel prices from oil-market indicators using both a tuned Random Forest Regressor and a neural network implemented from scratch in NumPy, with autoregressive lag features, recursive 12-month forecasting, stability clipping, and a Power BI dashboard for the underlying dataset.",
-        tags=["Python", "scikit-learn", "NumPy", "Power BI", "Time Series"],
-        github="https://github.com/nikhilken14/fuel-price-forecasting",
-        live="",
-        featured=False,
-    ),
-    Project(
-        id=6,
-        title="Plant Disease Classification (AlexNet)",
-        description="Trained an AlexNet-based transfer learning model in PyTorch on the PlantVillage dataset to classify plant leaf diseases across multiple categories, covering the full computer vision pipeline from preprocessing and augmentation through evaluation with confusion matrices and classification reports.",
-        tags=["PyTorch", "AlexNet", "Transfer Learning", "Computer Vision", "Torchvision"],
-        github="https://github.com/nikhilken14/alexnet-plant-disease-classification",
-        live="",
-        featured=False,
-    ),
-    Project(
-        id=7,
-        title="Rate-Limited Student Data Retrieval System",
-        description="Built a Spring Boot RESTful service with token-bucket rate limiting, Caffeine caching, and PostgreSQL optimization to improve performance, reduce database load, and maintain high availability under heavy traffic.",
-        tags=["Spring Boot", "Spring Data JPA", "PostgreSQL", "Caffeine", "REST API"],
-        github="https://github.com/nikhilken14/Rate-Limiter",
-        live="",
-        featured=False,
-    ),
-    Project(
-        id=8,
-        title="Linux Infrastructure Monitoring & Alerting System",
-        description="Developed a Bash-based Linux monitoring solution that tracks CPU, memory, disk usage, and system uptime with automated email alerts, incident reporting, logging, and Cron-based scheduled health checks.",
-        tags=["Linux", "Bash", "Cron", "Gmail SMTP", "Mailutils", "msmtp"],
-        github="https://github.com/nikhilken14/linux-server-monitoring-alert-system",
-        live="",
-        featured=False,
-    ),
-    Project(
-        id=9,
-        title="Car Rental System",
-        description="Built a full-stack car rental platform with a React frontend, Spring Boot REST APIs, and PostgreSQL backend featuring vehicle management, bookings, and real-time availability updates.",
-        tags=["React.js", "Spring Boot", "Spring Data JPA", "PostgreSQL", "REST API"],
-        github="https://github.com/nikhilken14/Car-Rental-Application",
-        live="",
-        featured=False,
-    ),
-]
-
-EDUCATION: List[Education] = [
-    Education(
-        id=1,
-        degree="B.E in Computer Science",
-        institution="Savitribai Phule Pune University",
-        duration="2021 — 2025",
-        cgpa="8.7",
-        description="Focused on data structures, distributed systems, and web engineering. Graduated with distinction.",
-    ),
-    Education(
-        id=2,
-        degree="Higher Secondary (PCM)",
-        institution="State Board",
-        duration="2020 — 2021",
-        cgpa="89%",
-        description="Specialized in Physics, Chemistry, and Mathematics with early electives in Computer Science.",
-    ),
-]
-
-EXPERIENCE: List[Experience] = [
-    Experience(
-        id=1,
-        role="Apprentice",
-        company="Tata Teleservices",
-        duration="Sep 2025 — Apr 2026",
-        description=[
-            "Managed end-to-end resolution of network and media-service incidents while consistently meeting SLA targets.",
-            "Diagnosed connectivity and switch-level issues using structured troubleshooting techniques, reducing recurring incidents.",
-            "Monitored production systems, analyzed logs, and collaborated with cross-functional engineering teams to ensure service reliability.",
-        ],
-    ),
-    Experience(
-        id=2,
-        role="AI Intern",
-        company="TechSaksham",
-        duration="Mar 2025 — Apr 2025",
-        description=[
-            "Performed data preprocessing, feature engineering, and exploratory data analysis (EDA) on real-world healthcare datasets to identify patterns supporting disease-prediction use cases.",
-            "Developed and evaluated machine learning models including Logistic Regression, Support Vector Machine (SVM), and Random Forest using Accuracy, Precision, Recall, and F1-Score.",
-            "Compared model performance, analyzed evaluation results, and presented findings to identify the most effective solution for the given dataset."
-        ],
-    ),
-]
-
-CERTIFICATIONS: List[Certification] = [
-    Certification(
-        id=1,
-        name="OCI Certified AI Foundation Associate",
-        issuer="Oracle",
-        date="October 16, 2025",
-        badge=f"{BASE_URL}data/OCI25AICFA.jpeg",
-        url="https://drive.google.com/file/d/19tX84gfZdH1JGMAxrHJOX5OWaC-mV-_m/view?usp=drive_link",
-    ),
-    Certification(
-        id=2,
-        name="OCI Certified Foundation Associate",
-        issuer="Oracle",
-        date="October 17, 2025",
-        badge=f"{BASE_URL}data/OCI25FNDCFA.jpeg",
-        url="https://drive.google.com/file/d/1lLcs7z0AEXljZTlGC67k6WN3PMQkasIh/view?usp=drive_link",
-    ),
-    Certification(
-        id=3,
-        name="Oracle Data Platform Certified Foundations Associate",
-        issuer="Oracle",
-        date="October 28, 2025",
-        badge=f"{BASE_URL}data/OCI25DCFAV2.jpg",
-        url="https://drive.google.com/file/d/11FjRWkUZM4imWs4LqEeEOx3MJbi1ZZCO/view?usp=drive_link",
-    ),
-    Certification(
-        id=4,
-        name="Oracle Agentic AI Certified Foundations Associate",
-        issuer="Oracle",
-        date="July 11, 2026",
-        badge=f"{BASE_URL}data/AAI26OFA.jpg",
-        url="https://drive.google.com/file/d/1kyMO0Aqy1nt5VRI88WiysAygHZ1eshU8/view?usp=drive_link",
-    ),
-    Certification(
-        id=5,
-        name="Microsoft Certified: Fabric Analytics Engineer Associate",
-        issuer="Microsoft",
-        date="July 30, 2026",
-        badge=f"{BASE_URL}data/fabric.png",
-        url = "https://drive.google.com/file/d/1Q_2a5fYVig2nuO0OUoD_a07eM3VSouJf/view?usp=drive_link",
-    ),
-]
-
-
-# ---------- Routes ----------
+# ---------- routes ----------
 
 @app.get("/")
 def root():
     return {"status": "ok", "message": "Portfolio API is running"}
 
 
-@app.get("/api/profile")
-def get_profile():
-    return PROFILE
+@app.get("/healthcheck")
+def healthcheck():
+    return {"status": "UP"}
 
 
-@app.get("/api/skills", response_model=List[Skill])
-def get_skills():
-    return SKILLS
-
-
-@app.get("/api/projects", response_model=List[Project])
-def get_projects():
-    return PROJECTS
-
-
-@app.get("/api/education", response_model=List[Education])
-def get_education():
-    return EDUCATION
-
-
-@app.get("/api/experience", response_model=List[Experience])
-def get_experience():
-    return EXPERIENCE
-
-
-@app.get("/api/certifications", response_model=List[Certification])
-def get_certifications():
-    return CERTIFICATIONS
-
-
-@app.post("/api/contact")
-def post_contact(payload: ContactMessage):
-    entry = payload.model_dump()
-    save_contact_message(entry)
-
-    # Best-effort email notification — a submission is still saved
-    # even if email sending fails, so no message is ever silently lost.
-    email_sent = False
-    email_error = None
-    if is_email_configured():
-        try:
-            send_contact_notification(
-                name=payload.name,
-                email=payload.email,
-                subject=payload.subject,
-                message=payload.message,
-            )
-            email_sent = True
-        except Exception as exc:
-            email_error = str(exc)
-            print(f"[contact] Failed to send email notification: {exc}")
-
+@app.get("/api/health")
+def health():
     return {
-        "success": True,
-        "message": "Thanks for reaching out — I'll reply soon.",
-        "email_sent": email_sent,
-        **({"email_error": email_error} if email_error else {}),
+        "status": "healthy",
+        "mongo_configured": db.is_mongo_configured(),
+        "email_configured": gmail.is_email_configured(),
     }
 
 
-@app.get("/api/admin/messages")
-def get_messages(x_admin_token: Opt[str] = Header(default=None)):
-    """
-    Lightweight, token-protected endpoint to view submitted contact messages
-    without needing direct DB access. Set ADMIN_TOKEN in the environment and
-    pass it as the 'X-Admin-Token' header to use this.
-    """
-    if not ADMIN_TOKEN:
-        raise HTTPException(status_code=404, detail="Not found")
-    if x_admin_token != ADMIN_TOKEN:
-        raise HTTPException(status_code=401, detail="Invalid or missing admin token")
-    return list_contact_messages()
+@app.post("/api/contact")
+def post_contact(payload: ContactMessage, request: Request):
+    if payload.website:  # bot: pretend success, do nothing
+        return {"success": True, "email_sent": False}
 
+    if not contact_limiter.allow(client_ip(request)):
+        raise HTTPException(429, "Too many messages. Please try again later or email me directly.")
 
-def _require_admin(x_admin_token: Opt[str]) -> None:
-    if not ADMIN_TOKEN:
-        raise HTTPException(status_code=404, detail="Not found")
-    if x_admin_token != ADMIN_TOKEN:
-        raise HTTPException(status_code=401, detail="Invalid or missing admin token")
+    data = payload.model_dump(exclude={"website"})
+
+    email_sent = False
+    if gmail.is_email_configured():
+        try:
+            gmail.send_contact_notification(**data)
+            email_sent = True
+        except gmail.EmailError as exc:
+            log.error("Contact email failed: %s", exc)
+
+    stored = False
+    if db.is_mongo_configured():
+        try:
+            db.save_contact_message(data, email_sent=email_sent)
+            stored = True
+        except Exception:
+            log.exception("Could not store contact message")
+
+    # Never report success unless the message landed somewhere durable.
+    if not (email_sent or stored):
+        raise HTTPException(502, "Could not deliver your message. Please email me directly.")
+
+    return {"success": True, "email_sent": email_sent, "stored": stored}
 
 
 @app.get("/api/resume/status")
 def resume_status():
-    """
-    Public, non-sensitive check for whether a resume is currently available,
-    so the frontend can show/hide the Download Resume button accordingly.
-    """
-    meta = get_resume_meta()
+    if not db.is_mongo_configured():
+        return {"available": False}
+    meta = db.get_resume_meta()
     if not meta:
         return {"available": False}
-    return {"available": True, "filename": meta.get("filename"), "uploaded_at": meta.get("uploaded_at")}
+    return {"available": True, **meta}
 
 
 @app.get("/api/resume")
 def download_resume():
-    """Public endpoint — streams the current resume file for download."""
-    resume = get_resume()
+    resume = db.get_resume() if db.is_mongo_configured() else None
     if not resume:
-        raise HTTPException(status_code=404, detail="No resume has been uploaded yet")
-
+        raise HTTPException(404, "No resume has been uploaded yet")
+    safe = re.sub(r"[^A-Za-z0-9._ -]", "_", resume["filename"] or "resume.pdf")
     return Response(
         content=resume["content"],
-        media_type=resume["content_type"] or "application/pdf",
-        headers={"Content-Disposition": f'attachment; filename="{resume["filename"]}"'},
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'attachment; filename="{safe}"',
+            "Cache-Control": "public, max-age=300",
+        },
     )
+
+
+@app.get("/api/admin/messages")
+def admin_messages():
+    if not db.is_mongo_configured():
+        return []
+    return db.list_contact_messages()
 
 
 @app.post("/api/admin/resume")
-async def upload_resume(
-    file: UploadFile = File(...),
-    x_admin_token: Opt[str] = Header(default=None),
+async def admin_upload_resume(
+    file: UploadFile = File(...)
 ):
-    """
-    Token-protected resume upload. Replaces any existing resume — there is
-    always at most one resume file stored at a time.
-    """
-    _require_admin(x_admin_token)
-
-    if file.content_type not in ("application/pdf",):
-        raise HTTPException(status_code=400, detail="Only PDF files are accepted")
-
-    content = await file.read()
-    max_size = 10 * 1024 * 1024  # 10MB safety cap
-    if len(content) > max_size:
-        raise HTTPException(status_code=400, detail="File too large (max 10MB)")
-
-    save_resume(content=content, filename=file.filename, content_type=file.content_type)
-    return {"success": True, "filename": file.filename}
+    if not db.is_mongo_configured():
+        raise HTTPException(503, "MongoDB is not configured")
+    content = await file.read(4 * 1024 * 1024 + 1)
+    if len(content) > 4 * 1024 * 1024:
+        raise HTTPException(413, "File too large (max 4MB)")
+    if not content.startswith(b"%PDF-") or b"%%EOF" not in content[-2048:]:
+        raise HTTPException(400, "Only PDF files are accepted")
+    name = re.sub(r"[^A-Za-z0-9._ -]", "_", (file.filename or "resume.pdf"))[:120]
+    if not name.lower().endswith(".pdf"):
+        raise HTTPException(400, "Filename must end in .pdf")
+    db.save_resume(content=content, filename=name, content_type="application/pdf")
+    return {"success": True, "filename": name}
 
 
 @app.delete("/api/admin/resume")
-def remove_resume(x_admin_token: Opt[str] = Header(default=None)):
-    """Token-protected resume removal."""
-    _require_admin(x_admin_token)
-    deleted = delete_resume()
-    return {"success": True, "deleted": deleted}
+def admin_delete_resume():
+    if not db.is_mongo_configured():
+        raise HTTPException(503, "MongoDB is not configured")
+    return {"success": True, "deleted": db.delete_resume()}
 
 
-@app.get("/api/health")
-def health_check():
-    return {
-        "status": "healthy",
-        "mongo_configured": is_mongo_configured(),
-        "email_configured": is_email_configured(),
-    }
-
-@app.get("/healthcheck")
-def health_monitor():
-    return JSONResponse(
-        status_code=200,
-        content={
-            "status": "UP",
-            "message": "Backend is running"
-        }
-    )
-
-@app.get("/api/email-status")
-def email_status():
-    return {
-        "configured": is_email_configured(),
-        "smtp_user": bool(SMTP_USER),
-        "smtp_password": bool(SMTP_PASSWORD),
-        "notify_email": bool(NOTIFY_EMAIL),
-        "smtp_host": SMTP_HOST,
-        "smtp_port": SMTP_PORT,
-    }
+@app.post("/api/admin/test-email")
+def admin_test_email():
+    """Sends a test notification so Gmail API setup can be verified after deploy."""
+    try:
+        gmail.send_contact_notification(
+            "Setup check", "noreply@example.com", "Gmail API test", "If you can read this, it works."
+        )
+    except gmail.EmailError as exc:
+        log.warning("Admin Gmail test failed: %s", exc)
+        raise HTTPException(502, "Email delivery failed; inspect Render logs")
+    return {"success": True}

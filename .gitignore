@@ -1,17 +1,7 @@
-# --- Frontend ---
-frontend/node_modules/
-frontend/dist/
-frontend/.env
-frontend/.env.local
-
-# --- Backend ---
-backend/__pycache__/
-backend/*.pyc
-backend/.env
-backend/venv/
-backend/data/messages.json
-
-# --- OS / editor ---
-.DS_Store
-.vscode/
-.idea/
+**/.env
+**/.env.*.local
+**/__pycache__/
+**/.venv/
+**/node_modules/
+**/dist/
+local-admin/secrets/

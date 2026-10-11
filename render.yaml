@@ -5,23 +5,28 @@ services:
     plan: free
     rootDir: backend
     buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    # --forwarded-allow-ips so the contact rate limiter sees real client IPs behind Render's proxy
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT --proxy-headers --forwarded-allow-ips='*'
+    healthCheckPath: /healthcheck
     envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
       - key: ALLOWED_ORIGINS
         sync: false
       - key: MONGODB_URI
         sync: false
       - key: MONGODB_DB_NAME
         value: portfolio
-      - key: SMTP_HOST
-        value: smtp.gmail.com
-      - key: SMTP_PORT
-        value: "587"
-      - key: SMTP_USER
+      # Gmail API over HTTPS (Render's free tier blocks SMTP ports 25/465/587)
+      - key: GMAIL_CLIENT_ID
         sync: false
-      - key: SMTP_PASSWORD
+      - key: GMAIL_CLIENT_SECRET
+        sync: false
+      - key: GMAIL_REFRESH_TOKEN
+        sync: false
+      - key: GMAIL_SENDER
         sync: false
       - key: NOTIFY_EMAIL
         sync: false
-      - key: ADMIN_TOKEN
+      - key: ADMIN_PUBLIC_KEY_B64
         sync: false

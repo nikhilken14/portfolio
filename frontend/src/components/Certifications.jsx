@@ -1,67 +1,24 @@
-import Reveal from "./Reveal";
-import "./Certifications.css";
+import { LuArrowUpRight } from "react-icons/lu";
+import Section from "./Section";
+import { CERTIFICATIONS } from "../data/portfolio";
 
-export default function Certifications({ certifications }) {
-  // Duplicate array to ensure a seamless infinite marquee loop
-  const infiniteCertifications = [...certifications, ...certifications];
-
+export default function Certifications() {
   return (
-    <section id="certifications" className="sci-certifications">
-      <Reveal delay={1}>
-          <h2 className="sci-section-title">
-            Certifications
-          </h2>
-        </Reveal>
-
-        <Reveal delay={2}>
-          <p className="sci-section-sub">
-            Credentials that validate my technical expertise.
-          </p>
-        </Reveal>
-
-      {/* Marquee Wrapper */}
-      <div className="sci-marquee-container">
-        <div className="sci-marquee-track">
-          {infiniteCertifications.map((cert, i) => (
-            <a
-              href={cert.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              key={`${cert.id}-${i}`}
-              className="sci-cert-card text-decoration-none"
-            >
-              <div className="sci-panel-card h-100">
-                <div className="sci-card-badge-frame">
-                  <img
-                    src={cert.badge}
-                    alt={cert.name}
-                    className="sci-card-badge"
-                  />
-                </div>
-
-                <h3 className="sci-card-name">
-                  {cert.name}
-                </h3>
-
-                <div className="sci-card-issuer">
-                  {cert.issuer}
-                </div>
-
-                {cert.date && (
-                  <div className="sci-card-date">
-                    {cert.date}
-                  </div>
-                )}
-
-                <div className="sci-card-view">
-                  View Certificate
-                  <i className="bi bi-arrow-up-right"></i>
-                </div>
+    <Section id="certifications" title="Certifications" intro="Credentials in cloud, data and agentic AI.">
+      <ul className="certs certs--text-only">
+        {CERTIFICATIONS.map((credential) => (
+          <li key={credential.id}>
+            <a className="cert" href={credential.url} target="_blank" rel="noopener noreferrer">
+              <div className="cert__body">
+                <span className="cert__eyebrow">{credential.issuer} / Credential</span>
+                <h3 className="cert__name">{credential.name}</h3>
+                <p className="cert__meta">{credential.date}</p>
+                <span className="cert__view">View credential <LuArrowUpRight aria-hidden="true" /></span>
               </div>
             </a>
-          ))}
-        </div>
-      </div>
-    </section>
+          </li>
+        ))}
+      </ul>
+    </Section>
   );
 }

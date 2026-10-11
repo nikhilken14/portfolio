@@ -1,24 +1,38 @@
-import axios from "axios";
+// In dev we default to the local API; in production the URL must come from
+// VITE_API_URL. Without one, backend features degrade gracefully (mailto).
+const API_BASE_URL = (import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:8000" : "")).replace(/\/$/, "");
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+export const hasApi = Boolean(API_BASE_URL);
+export const RESUME_URL = `${API_BASE_URL}/api/resume`;
 
-const client = axios.create({
-  baseURL: API_BASE_URL,
-  timeout: 10000,
-});
+async function request(path, { method = "GET", body, timeout = 10000 } = {}) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeout);
+  try {
+    const res = await fetch(`${API_BASE_URL}${path}`, {
+      method,
+      signal: ctrl.signal,
+      headers: body ? { "Content-Type": "application/json" } : undefined,
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    let data = null;
+    try {
+      data = await res.json();
+    } catch {
+      /* non-JSON body */
+    }
+    if (!res.ok) {
+      const err = new Error("Request failed");
+      err.status = res.status;
+      err.data = data;
+      throw err;
+    }
+    return data;
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
-export const getProfile = () => client.get("/api/profile").then((r) => r.data);
-export const getSkills = () => client.get("/api/skills").then((r) => r.data);
-export const getProjects = () => client.get("/api/projects").then((r) => r.data);
-export const getEducation = () => client.get("/api/education").then((r) => r.data);
-export const getExperience = () => client.get("/api/experience").then((r) => r.data);
-export const getCertifications = () => client.get("/api/certifications").then((r) => r.data);
-export const postContact = (payload) => client.post("/api/contact", payload).then((r) => r.data);
-export const getResumeStatus = () => client.get("/api/resume/status").then((r) => r.data);
-
-// Direct download URL — used as an <a href> target, not fetched via axios,
-// so the browser handles the file download/save dialog itself.
-export const RESUME_DOWNLOAD_URL = `${API_BASE_URL}/api/resume`;
-
-export { API_BASE_URL };
-export default client;
+export const getResumeStatus = () => request("/api/resume/status", { timeout: 60000 });
+// Render's free tier can take ~50s to wake, so the form allows a long timeout.
+export const postContact = (payload) => request("/api/contact", { method: "POST", body: payload, timeout: 70000 });
