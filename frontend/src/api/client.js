@@ -1,9 +1,12 @@
 // In dev we default to the local API; in production the URL must come from
 // VITE_API_URL. Without one, backend features degrade gracefully (mailto).
-const API_BASE_URL = (import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:8000" : "")).replace(/\/$/, "");
+const API_BASE_URL = (
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.DEV ? "http://localhost:8000" : "")
+).replace(/\/$/, "");
 
 export const hasApi = Boolean(API_BASE_URL);
-export const RESUME_URL = `${API_BASE_URL}/api/resume`;
+export const RESUME_URL = "/api/resume";
 
 async function request(path, { method = "GET", body, timeout = 10000 } = {}) {
   const ctrl = new AbortController();
@@ -33,6 +36,8 @@ async function request(path, { method = "GET", body, timeout = 10000 } = {}) {
   }
 }
 
-export const getResumeStatus = () => request("/api/resume/status", { timeout: 60000 });
+export const getResumeStatus = () =>
+  request("/api/resume/status", { timeout: 60000 });
 // Render's free tier can take ~50s to wake, so the form allows a long timeout.
-export const postContact = (payload) => request("/api/contact", { method: "POST", body: payload, timeout: 70000 });
+export const postContact = (payload) =>
+  request("/api/contact", { method: "POST", body: payload, timeout: 70000 });

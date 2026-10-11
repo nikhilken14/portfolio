@@ -16,3 +16,9 @@
   [headers.values]
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
+
+[[redirects]]
+  from = "/api/resume"
+  to = "https://portfolio-85lf.onrender.com/api/resume"
+  status = 200
+  force = true
