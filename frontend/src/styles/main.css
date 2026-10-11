@@ -1821,3 +1821,25 @@ body {
     transition: none;
   }
 }
+
+/* Final Contact section refinements */
+@media (min-width: 961px) {
+  .editorial-contact {
+    padding-top: 90px;
+    padding-bottom: 85px;
+  }
+
+  .editorial-contact__grid {
+    grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.9fr);
+    gap: clamp(55px, 6vw, 110px);
+  }
+
+  .editorial-contact__title {
+    margin-top: 55px;
+    font-size: clamp(4.5rem, 7.2vw, 8.5rem);
+  }
+
+  .editorial-contact__aside {
+    padding-top: 90px;
+  }
+}
