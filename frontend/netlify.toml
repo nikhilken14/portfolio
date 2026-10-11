@@ -22,3 +22,13 @@
   to = "https://portfolio-85lf.onrender.com/api/resume"
   status = 200
   force = true
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/google123456789abcdef.html"
+  to = "/google123456789abcdef.html"
+  status = 200
