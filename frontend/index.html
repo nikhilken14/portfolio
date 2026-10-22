@@ -4,7 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+    <!-- Favicons: Google Search needs a crawlable square icon (multiple of 48px) -->
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
 
     <!-- Title optimized to establish "Nikhil Kenjale" as the primary name/brand entity -->
     <title>Nikhil Kenjale - Software Engineer in Pune</title>
@@ -23,6 +28,8 @@
 
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Nikhil Kenjale" />
+    <meta name="application-name" content="Nikhil Kenjale" />
+    <meta name="apple-mobile-web-app-title" content="Nikhil Kenjale" />
     <meta
       property="og:title"
       content="Nikhil Kenjale - Software Engineer in Pune"
@@ -43,46 +50,46 @@
       content="Nikhil Kenjale is a software engineer in Pune building backend systems with Java, Spring Boot, Python and FastAPI, plus RAG and agent-based AI applications."
     />
 
-    <!-- Enhanced Identity and Schema markup with location and core skills -->
+    <!-- Site name markup: tells Google to show "Nikhil Kenjale" instead of "Netlify" -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
-        "@graph": [
-          {
-            "@type": "WebSite",
-            "@id": "https://nikhilkenjale.netlify.app/#website",
-            "url": "https://nikhilkenjale.netlify.app/",
-            "name": "Nikhil Kenjale",
-            "alternateName": "Nikhil Kenjale Portfolio"
-          },
-          {
-            "@type": "Person",
-            "@id": "https://nikhilkenjale.netlify.app/#person",
-            "name": "Nikhil Kenjale",
-            "url": "https://nikhilkenjale.netlify.app/",
-            "jobTitle": "Software Engineer",
-            "address": {
-              "@type": "PostalAddress",
-              "addressLocality": "Pune",
-              "addressRegion": "Maharashtra",
-              "addressCountry": "IN"
-            },
-            "knowsAbout": [
-              "Java",
-              "Spring Boot",
-              "Python",
-              "FastAPI",
-              "Backend Engineering",
-              "Retrieval-Augmented Generation (RAG)",
-              "Agent-based AI"
-            ],
-            "sameAs": [
-              "https://github.com/nikhilken14",
-              "https://www.linkedin.com/in/nikhilkenjale1314a10/",
-              "https://www.kaggle.com/kenjalenikhil14",
-              "https://leetcode.com/u/nikhilkenjale/"
-            ]
-          }
+        "@type": "WebSite",
+        "name": "Nikhil Kenjale",
+        "alternateName": ["Nikhil Kenjale Portfolio", "NK"],
+        "url": "https://nikhilkenjale.netlify.app/"
+      }
+    </script>
+
+    <!-- Identity markup with location and core skills -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "@id": "https://nikhilkenjale.netlify.app/#person",
+        "name": "Nikhil Kenjale",
+        "url": "https://nikhilkenjale.netlify.app/",
+        "jobTitle": "Software Engineer",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Pune",
+          "addressRegion": "Maharashtra",
+          "addressCountry": "IN"
+        },
+        "knowsAbout": [
+          "Java",
+          "Spring Boot",
+          "Python",
+          "FastAPI",
+          "Backend Engineering",
+          "Retrieval-Augmented Generation (RAG)",
+          "Agent-based AI"
+        ],
+        "sameAs": [
+          "https://github.com/nikhilken14",
+          "https://www.linkedin.com/in/nikhilkenjale1314a10/",
+          "https://www.kaggle.com/kenjalenikhil14",
+          "https://leetcode.com/u/nikhilkenjale/"
         ]
       }
     </script>
