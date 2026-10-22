@@ -13,8 +13,7 @@ export default function Hero({ resumeAvailable }) {
         <div className="cinematic-hero__content">
           {/* Eyebrow updated to include your full name for Google entity recognition */}
           <p className="cinematic-hero__eyebrow">
-            NIKHIL KENJALE — SOFTWARE & AI ENGINEER <span />{" "}
-            {PROFILE.location.toUpperCase()}
+            NIKHIL KENJALE — SOFTWARE & AI ENGINEER <span />
           </p>
 
           <h1 id="hero-title" className="cinematic-hero__title">

@@ -4,9 +4,9 @@ import { LuArrowUpRight, LuMenu, LuX } from "react-icons/lu";
 const LINKS = [
   { id: "about", label: "About" },
   { id: "projects", label: "Work" },
+  { id: "skills", label: "Skills" },
   { id: "experience", label: "Experience" },
   { id: "education", label: "Education" },
-  { id: "skills", label: "Skills" },
   { id: "certifications", label: "Certifications" },
 ];
 
