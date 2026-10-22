@@ -37,7 +37,13 @@ export default function Footer({ resumeAvailable }) {
             >
               Nikhil<span className="lexsi-footer__dot">.</span>Kenjale
             </a>
-            <LuMapPin>{PROFILE.location}</LuMapPin>
+
+            {/* Location wrapper with orange color and flex alignment */}
+            <div className="lexsi-footer__location">
+              <LuMapPin aria-hidden="true" />
+              <span>{PROFILE.location}</span>
+            </div>
+
             <p>
               I design and build reliable software, scalable backend systems,
               data pipelines, and AI-powered applications that solve real-world
