@@ -1494,6 +1494,16 @@ button {
   letter-spacing: 0.08em;
 }
 
+.lexsi-footer__location {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem; /* Increased space between icon and text (adjust as needed) */
+  color: #f97316; /* Sets both the icon and the text to orange */
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+}
+
 .lexsi-footer__column a {
   display: inline-flex;
   align-items: center;
